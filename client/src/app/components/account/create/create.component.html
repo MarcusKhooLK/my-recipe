@@ -1,0 +1,25 @@
+<div *ngIf="!isLoggedIn">
+    <h1>Create Your Account</h1>
+    <h2>Already have an account? <a [routerLink]="['/']">Sign In</a></h2>
+    <div><span style="color: red;">{{errorMsg}}</span></div>
+    <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
+        <table>
+            <tr>
+                <td>Username:</td>
+                <td><input type="text" formControlName="username"></td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td><input type="email" formControlName="email"></td>
+            </tr>
+            <tr>
+                <td>Password: </td>
+                <td><input type="password" formControlName="password"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><button type="submit" [disabled]="form.invalid">Create</button>
+            </tr>
+        </table>
+    </form>
+</div>

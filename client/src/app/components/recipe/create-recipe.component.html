@@ -1,0 +1,58 @@
+<div *ngIf="isLoggedIn">
+    <h1>Create your Recipe!</h1>
+    <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td><input type="text" formControlName="name"></td>
+            </tr>
+            <tr>
+                <td>Thumbnail:</td>
+                <td><input type="file" accept="image/*" formControlName="thumbnail" #file></td>
+            </tr>
+            <tr>
+                <td>Category:</td>
+                <td>
+                    <select formControlName="category">
+                        <option *ngFor="let c of categories" [value]="c">{{c}}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Area:</td>
+                <td>
+                    <select formControlName="area">
+                        <option *ngFor="let a of areas" [value]="a">{{a}}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Instructions:</td>
+                <textarea cols="80" rows="5" formControlName="instructions"></textarea>
+            </tr>
+            <tr>
+                <td>Youtube Link:</td>
+                <td><input type="url" formControlName="youtubeLink"></td>
+            </tr>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingredients</th>
+                    <th>
+                        <button type="button" (click)="onAddIngredient()">+</button>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody formArrayName="ingredients">
+                <tr *ngFor="let ingredient of ingredientsArray.controls; let i = index" [formGroup]="ingredient">
+                    <td><input type="text" placeholder="Measurement" formControlName="measurement"></td>
+                    <td><input type="text" placeholder="Ingredient" formControlName="ingredient"></td>
+                    <td><button type="button" (click)="onRemoveIngredient(i)">x</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" [disabled]="form.invalid">Submit</button>
+    </form>
+</div>

@@ -1,0 +1,13 @@
+<p>Search results for <span>{{this.query}}</span></p>
+<div class="grid-container">
+    <div *ngFor="let r of recipes" class="grid-item">
+        <img src="{{r.thumbnail}}" width="200" height="auto">
+        <br>
+        <a *ngIf="!r.user" [routerLink]="['/recipe', r.recipeId]">{{r.name}}</a>
+        <a *ngIf="r.user" [routerLink]="['/recipe/user', r.recipeId]">{{r.name}}</a>
+    </div>
+</div>
+<div *ngIf="isEmpty">
+    <p>Your search <em><span>{{this.query}}</span></em> did not match any
+        listings. Try another search.</p>
+</div>

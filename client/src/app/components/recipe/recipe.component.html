@@ -1,0 +1,19 @@
+<div *ngIf="recipe">
+    <p>{{recipe.name}} | Created by: {{recipe.createdBy}}</p>
+    <p><img src="{{recipe.thumbnail}}" width="600" height="auto"></p>
+    <p>
+        <a [routerLink]="['/recipes/category', recipe.category]"><span>{{recipe.category}}</span></a>
+        <a [routerLink]="['/recipes/area',recipe.country]"><span>{{recipe.country}}</span></a>
+    </p>
+    <p>Instructions</p>
+    <p style="width: 1000px; word-wrap: break-word;">{{recipe.instructions}}</p>
+    <ul>Ingredients
+        <li *ngFor="let ingredient of recipe.ingredients; let i = index;">
+            {{recipe.measurements[i]}} {{ingredient}}
+        </li>
+    </ul>
+    <div *ngIf="recipe.youtubeLink">
+        <a href="{{recipe.youtubeLink}}" target="_blank">{{recipe.youtubeLink}}</a>
+        <!--<iframe width="1024" height="576" src="{{recipe.youtubeLink|safe:'resourceUrl'}}"></iframe>-->
+    </div>
+</div>

@@ -1,0 +1,14 @@
+<div *ngIf="isLoggedIn">
+    <h1>Welcome</h1>
+    <h2>Your recipes</h2>
+    <div class="grid-container">
+        <div *ngFor="let r of recipes" class="grid-item">
+            <img src="{{r.thumbnail}}" width="200" height="auto">
+            <br>
+            <a [routerLink]="['/recipe', 'user', r.recipeId]">{{r.name}}</a>
+        </div>
+    </div>
+    <div *ngIf="recipes.length <= 0">
+        <p>You do not have any recipes. <a [routerLink]="['/account/recipe/create']">Create</a> now!</p>
+    </div>
+</div>
