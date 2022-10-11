@@ -38,10 +38,10 @@ jobs:
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH }}
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE }}
         with:
-          app_yaml_path: "server/app.yaml"
+          app_yaml_path: "server/src/main/appengine/app.yaml"
       - uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
       - uses: 'google-github-actions/deploy-appengine@v0'
         with:
-          deliverables: 'server/app.yaml'
+          working_directory: 'server'
