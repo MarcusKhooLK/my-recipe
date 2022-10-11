@@ -6,6 +6,7 @@ on:
     - '!v*-alpha'
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Create GitHub release
@@ -15,6 +16,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   deploy_on_app_engine:
+    needs: release
     name: Deploy
     runs-on: ubuntu-latest
     steps:
