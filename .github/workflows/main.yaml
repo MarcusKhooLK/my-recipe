@@ -23,7 +23,7 @@ jobs:
       - name: Checkout files
         uses: Bhacaz/checkout-files@v2
         with:
-        files: server
+          files: server
       - uses: 73h/gae-app-yaml-replace-env-variables@v0.1
         env:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
