@@ -107,7 +107,7 @@ public class Recipe extends RecipeSummary{
                 .add("category", category)
                 .add("country", country)
                 .add("instructions", instructions)
-                .add("youtubeLink", youtubeLink)
+                .add("youtubeLink", (youtubeLink == null) ? "" : youtubeLink)
                 .add("createdBy", createdBy)
                 .add("ingredients", ingredientsBuilder)
                 .add("measurements", measurementBuilder)

@@ -17,6 +17,8 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { CreateRecipeComponent } from './components/recipe/create-recipe.component';
 import { MyRecipeService } from './services/my-recipe.service';
 import { NotFoundComponent } from './components/error/not-found.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MaterialModule } from './material.module';
 
 const appRoutes : Routes = [
   {path:"", component: LoginComponent},
@@ -29,8 +31,7 @@ const appRoutes : Routes = [
   {path:"recipes/area/:area", component:ListRecipesComponent},
   {path:"recipe/:user/:recipeId", component:RecipeComponent},
   {path:"recipe/:recipeId", component:RecipeComponent},
-  {path:"notFound", component:NotFoundComponent},
-  {path:"**", redirectTo:"/", pathMatch:"full"}
+  {path:"**", component: NotFoundComponent}
 ]
 
 @NgModule({
@@ -51,7 +52,9 @@ const appRoutes : Routes = [
     ReactiveFormsModule,
     RouterModule.forRoot(appRoutes, {useHash:true}),
     HttpClientModule,
-    SocialLoginModule
+    SocialLoginModule,
+    BrowserAnimationsModule,
+    MaterialModule
   ],
   providers: [MealDbService, AccountService, MyRecipeService, {
     provide: 'SocialAuthServiceConfig',
@@ -60,7 +63,7 @@ const appRoutes : Routes = [
         providers: [
           {
             id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider('845821657077-pu4rv80kam4kbf33pv4a73n51j16aic5.apps.googleusercontent.com'),
+            provider: new GoogleLoginProvider('942508289464-7dfn185umum2qefq9ftt7smk34p6p7gs.apps.googleusercontent.com'),
           },
         ],
       } as SocialAuthServiceConfig,

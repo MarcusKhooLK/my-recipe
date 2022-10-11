@@ -8,19 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.myrecipe.server.EmailDetails;
 import com.myrecipe.server.models.Recipe;
 import com.myrecipe.server.models.RecipeSummary;
 import com.myrecipe.server.models.Response;
+import com.myrecipe.server.services.EmailService;
 import com.myrecipe.server.services.MyRecipeService;
+import com.myrecipe.server.services.S3Service;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
@@ -32,18 +38,30 @@ public class MyRecipeRESTController {
 
     @Autowired
     private MyRecipeService myRecipeSvc;
-    
+
+    @Autowired
+    private S3Service s3Svc;
+
+    @Autowired
+    private EmailService emailSvc;
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createRecipe(@RequestPart("thumbnail") MultipartFile file,
-                                                @RequestPart String name,
-                                                @RequestPart String category,
-                                                @RequestPart String area,
-                                                @RequestPart String instructions,
-                                                @RequestPart String youtubeLink,
-                                                @RequestPart String ingredients,
-                                                @RequestPart String measurements,
-                                                @RequestPart String email) {
-       Recipe r = new Recipe();
+            @RequestPart String name,
+            @RequestPart String category,
+            @RequestPart String area,
+            @RequestPart String instructions,
+            @RequestPart(name = "youtubeLink", required = false) String youtubeLink,
+            @RequestPart String ingredients,
+            @RequestPart String measurements,
+            @RequestPart String email) {
+
+        Optional<String> thumbnailOpt = s3Svc.upload(file, email);
+        if (thumbnailOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Recipe r = new Recipe();
         r.setName(name);
         r.setCategory(category);
         r.setCountry(area);
@@ -53,10 +71,23 @@ public class MyRecipeRESTController {
         List<String> measurementsList = Arrays.asList(measurements.split(","));
         r.setIngredients(ingredientsList);
         r.setMeasurements(measurementsList);
-        r.setThumbnail("./assets/test/placeholder.png");
+        r.setThumbnail(thumbnailOpt.get());
+
         int recipeId = myRecipeSvc.createRecipe(r, email);
 
-        if(recipeId > 0) {
+        if (recipeId > 0) {
+            String msgBody = """
+                    <div style="text-align:center;">
+                    <h1>Nicely done!</h1>
+                    <p>You have created your own custom recipe and is now available for cooks around the world to try it! Click below to view recipe!
+                    </p>
+                    <a href="">View Recipe</a>
+                    </div>
+                    """;
+            String subject = "New Recipe Created!";
+            EmailDetails details = new EmailDetails(email, msgBody, subject);
+            emailSvc.sendEmail(details);
+
             Response resp = new Response();
             resp.setCode(HttpStatus.CREATED.value());
             resp.setMessage("Recipe created");
@@ -71,18 +102,18 @@ public class MyRecipeRESTController {
     @GetMapping(path = "/recipe/{recipeId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getRecipeById(@PathVariable String recipeId) {
         Optional<Recipe> recipeOpt = myRecipeSvc.getRecipeById(recipeId);
-        if(recipeOpt.isEmpty()) {
+        if (recipeOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok().body(recipeOpt.get().toJson().toString());
         }
     }
 
-    @GetMapping(path="/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recipes", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getRecipesByEmail(@RequestParam String email) {
         List<RecipeSummary> recipes = myRecipeSvc.getRecipesSummaryByEmail(email);
         JsonArrayBuilder jArrayBuilder = Json.createArrayBuilder();
-        recipes.forEach(v->{
+        recipes.forEach(v -> {
             jArrayBuilder.add(v.toJson());
         });
         return ResponseEntity.ok(jArrayBuilder.build().toString());
@@ -92,7 +123,7 @@ public class MyRecipeRESTController {
     public ResponseEntity<String> getRecipesByName(@PathVariable String name) {
         List<RecipeSummary> recipes = myRecipeSvc.getRecipesSummaryByName(name);
         JsonArrayBuilder jArrayBuilder = Json.createArrayBuilder();
-        recipes.forEach(v->{
+        recipes.forEach(v -> {
             jArrayBuilder.add(v.toJson());
         });
         return ResponseEntity.ok(jArrayBuilder.build().toString());
@@ -102,7 +133,7 @@ public class MyRecipeRESTController {
     public ResponseEntity<String> getRecipesByCategory(@PathVariable String cat) {
         List<RecipeSummary> recipes = myRecipeSvc.getRecipesSummaryByCategory(cat);
         JsonArrayBuilder jArrayBuilder = Json.createArrayBuilder();
-        recipes.forEach(v->{
+        recipes.forEach(v -> {
             jArrayBuilder.add(v.toJson());
         });
         return ResponseEntity.ok(jArrayBuilder.build().toString());
@@ -112,9 +143,122 @@ public class MyRecipeRESTController {
     public ResponseEntity<String> getRecipesByArea(@PathVariable String area) {
         List<RecipeSummary> recipes = myRecipeSvc.getRecipesSummaryByArea(area);
         JsonArrayBuilder jArrayBuilder = Json.createArrayBuilder();
-        recipes.forEach(v->{
+        recipes.forEach(v -> {
             jArrayBuilder.add(v.toJson());
         });
         return ResponseEntity.ok(jArrayBuilder.build().toString());
+    }
+
+    @DeleteMapping(path = "/recipe/{recipeId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> deleteRecipeByRecipeId(@PathVariable String recipeId, @RequestBody String email) {
+        Response resp = new Response();
+        try {
+            Optional<Recipe> recipeOpt = myRecipeSvc.getRecipeById(recipeId);
+
+            if (recipeOpt.isEmpty()) {
+                resp.setCode(HttpStatus.BAD_REQUEST.value());
+                resp.setMessage("Something went wrong");
+                return ResponseEntity.badRequest().body(resp.toJson().toString());
+            }
+
+            if (myRecipeSvc.deleteRecipeByRecipeId(recipeId)) {
+                Recipe r = recipeOpt.get();
+                s3Svc.delete(r.getThumbnail());
+
+                String msgBody = """
+                        <div style="text-align:center;">
+                        <h1>Recipe removed</h1>
+                        <p>You have removed your custom recipe. Feel free to add more into your collection!</p>
+                        <a href="">Create Recipe</a>
+                        </div>
+                        """;
+                String subject = "Recipe removed!";
+                EmailDetails details = new EmailDetails(email, msgBody, subject);
+                emailSvc.sendEmail(details);
+
+                resp.setCode(HttpStatus.OK.value());
+                resp.setMessage("Deleted successfully");
+                return ResponseEntity.ok().body(resp.toJson().toString());
+            }
+        } catch (Exception e) {
+            System.err.println(e.getStackTrace());
+        }
+        resp.setCode(HttpStatus.BAD_REQUEST.value());
+        resp.setMessage("Something went wrong");
+        return ResponseEntity.badRequest().body(resp.toJson().toString());
+    }
+
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> editRecipe(@RequestPart(name = "thumbnail", required = false) MultipartFile file,
+            @RequestPart String name,
+            @RequestPart String category,
+            @RequestPart String area,
+            @RequestPart String instructions,
+            @RequestPart(name = "youtubeLink", required = false) String youtubeLink,
+            @RequestPart String ingredients,
+            @RequestPart String measurements,
+            @RequestPart String email,
+            @RequestPart String recipeId) {
+
+        Optional<Recipe> recipeOpt = myRecipeSvc.getRecipeById(recipeId);
+
+        Response resp = new Response();
+
+        if (recipeOpt.isEmpty()) {
+            resp.setCode(HttpStatus.NOT_FOUND.value());
+            resp.setMessage("Oops! Recipe you are editing cannot be found!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp.toJson().toString());
+        }
+
+        Recipe oldRecipe = recipeOpt.get();
+
+        Recipe r = new Recipe();
+        r.setRecipeId(oldRecipe.getRecipeId());
+        r.setName(name);
+        r.setCategory(category);
+        r.setCountry(area);
+        r.setInstructions(instructions);
+        r.setYoutubeLink(youtubeLink);
+        List<String> ingredientsList = Arrays.asList(ingredients.split(","));
+        List<String> measurementsList = Arrays.asList(measurements.split(","));
+        r.setIngredients(ingredientsList);
+        r.setMeasurements(measurementsList);
+
+        if (file != null) {
+            Optional<String> thumbnailOpt = s3Svc.upload(file, email);
+            if (thumbnailOpt.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            s3Svc.delete(oldRecipe.getThumbnail());
+            r.setThumbnail(thumbnailOpt.get());
+        } else {
+            r.setThumbnail(oldRecipe.getThumbnail());
+        }
+
+        try {
+            if (myRecipeSvc.editRecipe(r, email)) {
+
+                String msgBody = """
+                        <div style="text-align:center;">
+                        <h1>Your recipe was updated</h1>
+                        <p>You have updated your custom recipe. Click below to view your updated recipe!</p>
+                        <a href="">View Recipe</a>
+                        </div>
+                        """;
+                String subject = "Recipe removed!";
+                EmailDetails details = new EmailDetails(email, msgBody, subject);
+                emailSvc.sendEmail(details);
+
+                resp.setCode(HttpStatus.OK.value());
+                resp.setMessage("Updated successfully");
+                return ResponseEntity.ok().body(resp.toJson().toString());
+            }
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+
+        resp.setCode(HttpStatus.BAD_REQUEST.value());
+        resp.setMessage("Failed to update");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
     }
 }

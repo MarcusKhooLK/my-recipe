@@ -1,22 +1,37 @@
-<div *ngIf="!isLoggedIn">
-    <h1>Sign In</h1>
-    <h2>Don't have an account? <a [routerLink]="['/account/create']">Sign up</a></h2>
-    <div><span style="color: red;">{{errorMsg}}</span></div>
-    <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
-        <table>
-            <tr>
-                <td>Email:</td>
-                <td><input type="email" formControlName="email"></td>
-            </tr>
-            <tr>
-                <td>Password: </td>
-                <td><input type="password" formControlName="password"></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><button type="submit" [disabled]="form.invalid">Sign In</button>
-            </tr>
-        </table>
-    </form>
-    <asl-google-signin-button type='standard' text='signin_with'></asl-google-signin-button>
+<div class="container align-center">
+    <div class="row" *ngIf="!isLoggedIn">
+        <div class="col">
+            <mat-spinner *ngIf="isLoading"></mat-spinner>
+            <div *ngIf="!isLoading">
+                <h1>Sign In</h1>
+                <h2>Don't have an account? <a [routerLink]="['/account/create']">Sign up</a></h2>
+                <div><span style="color: red;">{{errorMsg}}</span></div>
+                <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Email</mat-label>
+                                    <input type="email" formControlName="email" matInput>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Password</mat-label>
+                                    <input type="password" formControlName="password" matInput>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><button type="submit" [disabled]="form.invalid" mat-flat-button color="primary">Sign
+                                    In</button></td>
+                        </tr>
+                    </table>
+                </form>
+                <asl-google-signin-button type='standard' text='signin_with'></asl-google-signin-button>
+            </div>
+        </div>
+    </div>
 </div>

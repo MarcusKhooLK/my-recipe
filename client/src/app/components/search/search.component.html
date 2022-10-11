@@ -1,28 +1,33 @@
-<div>
-    <h1>Search</h1>
-    <form [formGroup]="form" (ngSubmit)="onSearch()">
-        <input text="text" formControlName="search">
-        <button type="submit">Search</button>
-    </form>
-</div>
-<div>
-    <div>
-        <p>Suggestions</p>
-    </div>
-    <div>
-        <h1>Category</h1>
-        <div *ngFor="let a of areas">
-            <a [routerLink]="['/recipes/area', a]">
-                <h1>{{a}}</h1>
-            </a>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>Search</h1>
+            <form [formGroup]="form" (ngSubmit)="onSearch()">
+                <mat-form-field appearance="fill">
+                    <mat-label>Search recipes</mat-label>
+                    <input text="text" formControlName="search" matInput>
+                </mat-form-field>
+                <button type="submit" mat-flat-button color="primary">Search</button>
+            </form>
         </div>
     </div>
-    <div>
-        <h1>Area</h1>
-        <div *ngFor="let c of categories">
-            <a [routerLink]="['/recipes/category', c]">
-                <h1>{{c}}</h1>
-            </a>
+    <div class="row">
+        <div class="col">
+            <h1>Suggestions</h1>
+            <p>Category</p>
+            <mat-spinner *ngIf="isLoadingCat"></mat-spinner>
+            <div *ngFor="let a of areas">
+                <button [routerLink]="['/recipes/area', a]" mat-button>
+                    {{a}}
+                </button>
+            </div>
+            <p>Area</p>
+            <mat-spinner *ngIf="isLoadingArea"></mat-spinner>
+            <div *ngFor="let c of categories">
+                <button [routerLink]="['/recipes/category', c]" mat-button>
+                    {{c}}
+                </button>
+            </div>
         </div>
     </div>
 </div>

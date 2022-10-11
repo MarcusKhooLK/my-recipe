@@ -12,10 +12,12 @@ import { AccountService } from 'src/app/services/account.service';
 export class LoginComponent implements OnInit {
   
   form!: FormGroup
-  isLoggedIn: boolean = false;
+  isLoggedIn: boolean = false
   errorMsg: string = ""
 
-  constructor(private fb: FormBuilder, private accSvc:AccountService, private router: Router) { }
+  isLoading: boolean = false
+
+  constructor(private fb: FormBuilder, private accSvc:AccountService, private router: Router, private socialAuthService: SocialAuthService) { }
 
   ngOnInit(): void {
     this.isLoggedIn = localStorage.getItem('email') !== null
@@ -23,6 +25,12 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/profile'])
       return
     }
+
+    this.socialAuthService.authState.subscribe((user) => {
+      if(user){
+        this.isLoading = true
+      }
+    });
 
     this.form = this.createForm()
   }
@@ -37,13 +45,16 @@ export class LoginComponent implements OnInit {
   onSubmitForm() {
     const email = this.form.get('email')?.value
     const pwd = this.form.get('password')?.value
+    this.isLoading = true
     this.accSvc.auth(email, pwd)
     .then(result=>{
+      this.isLoading = false
       console.info(">>> result: ", result)
       this.accSvc.onLogin.next(result)
       this.router.navigate(['/profile'])
     })
     .catch(error=>{
+      this.isLoading = false
       console.error(">>> error: ", error)
       this.errorMsg = "Invalid credentials"
     })

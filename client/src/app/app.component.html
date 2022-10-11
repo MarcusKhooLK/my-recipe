@@ -1,12 +1,22 @@
-<div *ngIf="!isLoggedIn">
-    <button type="button" [routerLink]="['/']">Log In</button>
-</div>
-<div *ngIf="isLoggedIn">
-    <button type="button" [routerLink]="['/profile']">View Profile</button>
-    <button type="button" [routerLink]="['/account/recipe/create']">Create Recipe</button>
-    <button type="button" (click)="logOut()">Sign out</button>
-</div>
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+        <a [routerLink]="['/']" class="remove-text-style"><span>MyRecipe</span></a>
+        <span class="example-spacer"></span>
+        <div *ngIf="!isLoggedIn">
+            <button type="button" [routerLink]="['/']" mat-button>Log In</button>
+            <button type="button" [routerLink]="['/account/create']" mat-button>Sign Up</button>
+        </div>
+        <div *ngIf="isLoggedIn">
+            <button type="button" [routerLink]="['search']" mat-button>Search</button>
+            <button type="button" [routerLink]="['/profile']" mat-button>View Profile</button>
+            <button type="button" [routerLink]="['/account/recipe/create']" mat-button>Create Recipe</button>
+            <button type="button" (click)="logOut()" mat-button>Sign out</button>
+        </div>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+            <mat-icon>menu</mat-icon>
+        </button>
+    </mat-toolbar-row>
+</mat-toolbar>
 <div>
-    <button type="button" [routerLink]="['search']">Search</button>
 </div>
 <router-outlet></router-outlet>

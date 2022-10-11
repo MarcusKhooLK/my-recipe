@@ -1,10 +1,9 @@
-export interface Recipe{
-    recipeId: string;
-    name: string;
+import { RecipeSummary } from "./recipesummary";
+
+export interface Recipe extends RecipeSummary{
     category: string;
     country: string;
     instructions: string;
-    thumbnail: string;
     youtubeLink: string;
     createdBy: string;
     ingredients: string[]

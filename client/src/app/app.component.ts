@@ -14,12 +14,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
   isLoggedIn: boolean = false;
   user!:SocialUser | null
+  form!: FormGroup
 
   onLoginSub$!: Subscription
 
-  constructor(private socialAuthService: SocialAuthService, private accSvc:AccountService, private router: Router) {}
+  constructor(private socialAuthService: SocialAuthService, private accSvc:AccountService, private router: Router, private fb: FormBuilder) {}
 
   ngOnInit() {
+    this.form = this.createForm()
+
     this.socialAuthService.authState.subscribe((user) => {
       if(user) {
         this.user = user;
@@ -59,5 +62,20 @@ export class AppComponent implements OnInit, OnDestroy {
     localStorage.removeItem('username')
     this.isLoggedIn = false
     this.router.navigate(['/'])
+  }
+
+  onSearch() {
+    console.info(">>> onSearch: ", this.form.value)
+    const query = this.form.get('search')?.value
+    if(!!query) {
+      localStorage.setItem('query', query)
+      this.router.navigate(['/recipes'])
+    }
+  }
+
+  createForm() {
+    return this.fb.group({
+      search: this.fb.control<string>('')
+    })
   }
 }

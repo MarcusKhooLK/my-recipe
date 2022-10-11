@@ -14,6 +14,7 @@ export class CreateComponent implements OnInit {
   form!: FormGroup
   errorMsg: string = ""
   isLoggedIn: boolean = false;
+  isLoading: boolean = false
 
   constructor(private fb: FormBuilder, private accSvc: AccountService, private router: Router) { }
 
@@ -39,11 +40,13 @@ export class CreateComponent implements OnInit {
     const email = this.form.get('email')?.value
     const pwd = this.form.get('password')?.value
     const username = this.form.get('username')?.value
+    this.isLoading = true
     this.accSvc.createAccount(username, email, pwd)
     .then(result=>{
       this.router.navigate(['/'])
     })
     .catch(error=>{
+      this.isLoading = false;
       console.error(">>> error: ", error)
       this.errorMsg = error.error.message
     })

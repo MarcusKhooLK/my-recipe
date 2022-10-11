@@ -48,6 +48,24 @@ public class MyRecipeService {
         return -1;
     }
 
+    @Transactional
+    public Boolean editRecipe(Recipe recipe, String email) {
+        if(email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+        Optional<User> userOpt = accRepo.findUserByEmail(email);
+
+        if(userOpt.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+        myRecipeRepo.editRecipe(recipe, userOpt.get().getUserId());
+        Integer recipeId = Integer.parseInt(recipe.getRecipeId());
+        myRecipeRepo.deleteIngredientsByRecipeId(recipeId);
+        return myRecipeRepo.insertIngredients(recipe.getIngredients(), recipe.getMeasurements(), recipeId);
+    }
+
     public Optional<Recipe> getRecipeById(String recipedId) {
         try{
             Integer rId = Integer.parseInt(recipedId);
@@ -77,5 +95,14 @@ public class MyRecipeService {
 
     public List<RecipeSummary> getRecipesSummaryByArea(String area) {
         return myRecipeRepo.getRecipesSummaryByArea(area);
+    }
+
+    @Transactional
+    public boolean deleteRecipeByRecipeId(String recipeId) {
+        int rId = Integer.parseInt(recipeId);
+        if(myRecipeRepo.deleteIngredientsByRecipeId(rId)) {
+            return myRecipeRepo.deleteRecipeByRecipeId(rId);
+        }
+        return false;
     }
 }

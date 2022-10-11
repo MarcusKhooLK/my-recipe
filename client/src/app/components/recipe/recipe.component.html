@@ -1,19 +1,28 @@
-<div *ngIf="recipe">
-    <p>{{recipe.name}} | Created by: {{recipe.createdBy}}</p>
-    <p><img src="{{recipe.thumbnail}}" width="600" height="auto"></p>
-    <p>
-        <a [routerLink]="['/recipes/category', recipe.category]"><span>{{recipe.category}}</span></a>
-        <a [routerLink]="['/recipes/area',recipe.country]"><span>{{recipe.country}}</span></a>
-    </p>
-    <p>Instructions</p>
-    <p style="width: 1000px; word-wrap: break-word;">{{recipe.instructions}}</p>
-    <ul>Ingredients
-        <li *ngFor="let ingredient of recipe.ingredients; let i = index;">
-            {{recipe.measurements[i]}} {{ingredient}}
-        </li>
-    </ul>
-    <div *ngIf="recipe.youtubeLink">
-        <a href="{{recipe.youtubeLink}}" target="_blank">{{recipe.youtubeLink}}</a>
-        <!--<iframe width="1024" height="576" src="{{recipe.youtubeLink|safe:'resourceUrl'}}"></iframe>-->
+<div class="container">
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <div class="row" *ngIf="recipe">
+        <div class="col">
+            <h1>{{recipe.name}} | Created by: {{recipe.createdBy}}</h1>
+            <p>
+                <img *ngIf="!recipe.user" src="{{recipe.thumbnail}}" width="600" height="auto">
+                <img *ngIf="recipe.user" src="/thumbnails/{{recipe.thumbnail}}" width="600" height="auto">
+            </p>
+            <p>
+                <button [routerLink]="['/recipes/category', recipe.category]" mat-button>{{recipe.category}}</button>
+                <button [routerLink]="['/recipes/area',recipe.country]" mat-button>{{recipe.country}}</button>
+            </p>
+            <h2>Instructions</h2>
+            <p style="width: 100%; word-wrap: break-word;">{{recipe.instructions}}</p>
+            <h2>Ingredients</h2>
+            <ul>
+                <li *ngFor="let ingredient of recipe.ingredients; let i = index;">
+                    {{recipe.measurements[i]}} {{ingredient}}
+                </li>
+            </ul>
+            <div *ngIf="recipe.youtubeLink">
+                <a href="{{recipe.youtubeLink}}" target="_blank">{{recipe.youtubeLink}}</a>
+                <!--<iframe width="1024" height="576" src="{{recipe.youtubeLink|safe:'resourceUrl'}}"></iframe>-->
+            </div>
+        </div>
     </div>
 </div>

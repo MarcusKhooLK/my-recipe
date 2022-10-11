@@ -13,6 +13,9 @@ export class SearchComponent implements OnInit {
   form!: FormGroup
   areas: string[] = []
   categories: string[] = []
+
+  isLoadingCat: boolean = true;
+  isLoadingArea:boolean = true;
   
   constructor(private fb: FormBuilder, private router:Router, private mealDbSvc: MealDbService) { }
 
@@ -22,23 +25,27 @@ export class SearchComponent implements OnInit {
     this.mealDbSvc.getAllAreas()
     .then(result=>{
       this.areas = result;
+      this.isLoadingArea = false;
     })
     .catch(error=>{
       console.error(">>> error: ", error)
+      this.isLoadingArea = false;
     })
 
     this.mealDbSvc.getAllCategories()
     .then(result=>{
       this.categories = result;
+      this.isLoadingCat = false;
     })
     .catch(error=>{
       console.error(">>> error: ", error)
+      this.isLoadingCat = false;
     })
   }
 
   createForm() {
     return this.fb.group({
-      search: this.fb.control<string>('', [Validators.required])
+      search: this.fb.control<string>('')
     })
   }
 

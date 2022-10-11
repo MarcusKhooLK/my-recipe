@@ -13,7 +13,7 @@ export class ListRecipesComponent implements OnInit {
 
   recipes: RecipeSummary[] = []
   query!: string
-  isEmpty: boolean = false;
+  isLoading: boolean = true;
 
   constructor(private mealDbSvc: MealDbService, private router: Router, private activatedRoute: ActivatedRoute, private myRecipeSvc: MyRecipeService) { }
 
@@ -36,13 +36,16 @@ export class ListRecipesComponent implements OnInit {
             v.user = true
           })
           this.recipes.push(...result)
+          this.isLoading = false;
         })
         .catch(error=>{
           console.error(">>> error: ", error)
+          this.isLoading = false;
         })
       })
       .catch(error=>{
         console.error(">>> error: ", error)
+        this.isLoading = false;
       })
 
       return;
@@ -59,13 +62,16 @@ export class ListRecipesComponent implements OnInit {
             v.user = true
           })
           this.recipes.push(...result)
+          this.isLoading = false;
         })
         .catch(error=>{
           console.error(">>> error: ", error)
+          this.isLoading = false;
         })
       })
       .catch(error=>{
         console.error(">>> error: ", error)
+        this.isLoading = false;
       })
 
       return;
@@ -78,7 +84,6 @@ export class ListRecipesComponent implements OnInit {
       this.mealDbSvc.getRecipes(this.query)
         .then(result => {
           this.recipes = result
-          this.isEmpty = this.recipes.length === 0
         })
         .then(result => {
           this.myRecipeSvc.getRecipesByName(this.query)
@@ -87,13 +92,16 @@ export class ListRecipesComponent implements OnInit {
               v.user = true
             })
             this.recipes.push(...result)
+            this.isLoading = false;
           })
           .catch(error=>{
             console.error(">>> error: ", error)
+            this.isLoading = false;
           })
         })
         .catch(error => {
           console.error(">>> error: ", error)
+          this.isLoading = false;
         })
     } else {
       this.router.navigate(['/search'])

@@ -43,6 +43,12 @@ export class MyRecipeService {
         )
     }
 
+    editRecipe(formData: FormData): Promise<Response> {
+        return firstValueFrom(
+            this.httpClient.put<Response>('/api/myrecipe', formData)
+        )
+    }
+
     getRecipe(recipeId: string): Promise<Recipe> {
         const headers = new HttpHeaders()
             .set('Accept', 'application/json')
@@ -59,6 +65,21 @@ export class MyRecipeService {
         const params = new HttpParams().set('email', email)
         return firstValueFrom(
             this.httpClient.get<RecipeSummary[]>(`/api/myrecipe/recipes`, { headers, params })
+        )
+    }
+
+    deleteRecipeByRecipeId(recipeId: string, email: string): Promise<Response> {
+        const headers = new HttpHeaders()
+            .set('Accept', 'application/json')
+            .set('Content-Type', 'application/json')
+        return firstValueFrom(
+            this.httpClient.delete<Response>(`/api/myrecipe/recipe/${recipeId}`, { headers, body: email })
+        )
+    }
+
+    getThumbnail(thumbnail: string) {
+        return firstValueFrom(
+            this.httpClient.get(thumbnail, { responseType:'blob' })
         )
     }
 }

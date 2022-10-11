@@ -32,10 +32,18 @@ public class MyRecipeRepository {
     on u.user_id = r.user_id
     where r.recipe_id = ?;
     """;
-    private static final String SQL_SELECT_INGREDIENTS_BY_RECIPE_ID = "select * from ingredient where recipe_id = ?;";
     private static final String SQL_SELECT_RECIPE_BY_NAME = "select * from recipe where name like ?;";
     private static final String SQL_SELECT_RECIPE_BY_CATEGORY = "select * from recipe where category like ?;";
     private static final String SQL_SELECT_RECIPE_BY_AREA = "select * from recipe where country like ?;";
+    private static final String SQL_DELETE_RECIPE_BY_ID = "delete from recipe where recipe_id = ?;";
+    private static final String SQL_UPDATE_RECIPE = 
+    """
+    update recipe set name = ?, category = ?, country = ?, instructions = ?, thumbnail = ?, youtubeLink = ?
+    where recipe_id = ? and user_id = ?;
+    """;
+
+    private static final String SQL_DELETE_INGREDIENTS_BY_RECIPEID = "delete from ingredient where recipe_id = ?;";
+    private static final String SQL_SELECT_INGREDIENTS_BY_RECIPE_ID = "select * from ingredient where recipe_id = ?;";
 
     @Autowired
     private JdbcTemplate template;
@@ -132,7 +140,8 @@ public class MyRecipeRepository {
         final SqlRowSet result = template.queryForRowSet(SQL_SELECT_RECIPE_BY_NAME, "%"+name+"%");
         List<RecipeSummary> recipes = new ArrayList<>();
         while(result.next()) {
-            recipes.add(RecipeSummary.convert(result));
+            RecipeSummary r = RecipeSummary.convert(result);
+            recipes.add(r);
         }
         return recipes;
     }
@@ -141,7 +150,8 @@ public class MyRecipeRepository {
         final SqlRowSet result = template.queryForRowSet(SQL_SELECT_RECIPE_BY_CATEGORY, cat);
         List<RecipeSummary> recipes = new ArrayList<>();
         while(result.next()) {
-            recipes.add(RecipeSummary.convert(result));
+            RecipeSummary r = RecipeSummary.convert(result);
+            recipes.add(r);
         }
         return recipes;
     }
@@ -150,8 +160,34 @@ public class MyRecipeRepository {
         final SqlRowSet result = template.queryForRowSet(SQL_SELECT_RECIPE_BY_AREA, area);
         List<RecipeSummary> recipes = new ArrayList<>();
         while(result.next()) {
-            recipes.add(RecipeSummary.convert(result));
+            RecipeSummary r = RecipeSummary.convert(result);
+            recipes.add(r);
         }
         return recipes;
     }
+
+    public boolean deleteRecipeByRecipeId(Integer recipeId) {
+        int result = template.update(SQL_DELETE_RECIPE_BY_ID, recipeId);
+        return result > 0;
+    }
+
+    public boolean deleteIngredientsByRecipeId(Integer recipeId) {
+        int result = template.update(SQL_DELETE_INGREDIENTS_BY_RECIPEID, recipeId);
+        return result > 0;
+    }
+
+    public boolean editRecipe(Recipe recipe, Integer userId) {
+        int result = template.update(SQL_UPDATE_RECIPE, 
+        recipe.getName(), 
+        recipe.getCategory(), 
+        recipe.getCountry(),
+        recipe.getInstructions(), 
+        recipe.getThumbnail(), 
+        recipe.getYoutubeLink(), 
+        recipe.getRecipeId(), 
+        userId);
+
+        return result > 0;
+    }
+
 }

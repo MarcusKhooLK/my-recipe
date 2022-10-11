@@ -12,6 +12,7 @@ import { MyRecipeService } from 'src/app/services/my-recipe.service';
 export class RecipeComponent implements OnInit {
 
   recipe!: Recipe
+  isLoading: boolean = true;
 
   constructor(private activatedRoute: ActivatedRoute, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router) { }
 
@@ -24,6 +25,8 @@ export class RecipeComponent implements OnInit {
       this.myRecipeSvc.getRecipe(recipeId)
       .then(result => {
         this.recipe = result
+        this.recipe.user = true
+        this.isLoading = false;
       })
       .catch(error => {
         this.router.navigate(['/notFound'])
@@ -32,8 +35,10 @@ export class RecipeComponent implements OnInit {
       this.mealDbSvc.getRecipe(recipeId)
         .then(result => {
           this.recipe = result
+          this.isLoading = false;
         })
         .catch(error => {
+          this.isLoading = false;
           this.router.navigate(['/notFound'])
         })
     }

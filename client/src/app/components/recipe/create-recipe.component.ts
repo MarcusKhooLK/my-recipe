@@ -17,8 +17,13 @@ export class CreateRecipeComponent implements OnInit {
   categories: string[] = ['Beef']
   isLoggedIn: boolean = false
 
+  selectedArea: string = 'American'
+  selectedCat: string = 'Beef'
+
   @ViewChild('file')
   thumbnailImage!: ElementRef
+
+  isLoading: boolean = true
 
   constructor(private fb: FormBuilder, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router) { }
 
@@ -40,9 +45,11 @@ export class CreateRecipeComponent implements OnInit {
     this.mealDbSvc.getAllCategories()
     .then(result=>{
       this.categories = result;
+      this.isLoading = false;
     })
     .catch(error=>{
       console.error(">>> error: ", error)
+      this.isLoading = false;
     })
 
     this.form = this.createForm()
@@ -53,7 +60,7 @@ export class CreateRecipeComponent implements OnInit {
     this.onAddIngredient()
     return this.fb.group({
       name: this.fb.control<string>('', [Validators.required]),
-      thumbnail: this.fb.control<string>(''),
+      thumbnail: this.fb.control<string>('', [Validators.required]),
       category: this.fb.control<string>('Beef', [Validators.required]),
       area: this.fb.control<string>('American', [Validators.required]),
       instructions: this.fb.control<string>('', [Validators.required]),
@@ -91,15 +98,19 @@ export class CreateRecipeComponent implements OnInit {
     formData.set('ingredients', ingredientsArray.join(','))
     formData.set('measurements', measurementsArray.join(','))
     formData.set('email', localStorage.getItem('email') ?? '')
+
+    this.isLoading = true;
+
     this.myRecipeSvc.createRecipe(formData)
     .then(result=>{
       console.log(">>> result: ", result)
       this.form.reset()
+      this.isLoading = false;
       this.router.navigate(['/recipe', "user", result.data.recipeId])
     })
     .catch(error=>{
       console.log(">>> error: ", error)
+      this.isLoading = false;
     })
-    console.info(">>> submit: ", this.form.value)
   }
 }
