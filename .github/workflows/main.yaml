@@ -20,9 +20,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: Bhacaz/checkout-files@v2
-        with:
-          files: server
+      - uses: actions/checkout@v2
       - uses: 73h/gae-app-yaml-replace-env-variables@v0.1
         env:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
