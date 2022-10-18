@@ -1,41 +1,44 @@
 <div class="container align-center">
     <div class="row" *ngIf="!isLoggedIn">
         <div class="col">
-            <h1>Create Account</h1>
-            <h2>Already have an account? <a [routerLink]="['/']">Sign In</a></h2>
-            <div><span style="color: red;">{{errorMsg}}</span></div>
-            <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
-                <table class="table">
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="outline">
-                                <mat-label>Username</mat-label>
-                                <input type="text" formControlName="username" matInput>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="outline">
-                                <mat-label>Email</mat-label>
-                                <input type="email" formControlName="email" matInput>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="outline">
-                                <mat-label>Password</mat-label>
-                                <input type="password" formControlName="password" matInput>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><button type="submit" [disabled]="form.invalid" mat-flat-button
-                                color="primary">Create</button>
-                    </tr>
-                </table>
-            </form>
+            <p><mat-spinner *ngIf="isLoading"></mat-spinner></p>
+            <div *ngIf="!isLoading">
+                <h1>Create Account</h1>
+                <h2>Already have an account? <button [routerLink]="['/']" mat-raised-button color="primary">Sign In</button></h2>
+                <div><span style="color: red;">{{errorMsg}}</span></div>
+                <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Username</mat-label>
+                                    <input type="text" formControlName="username" matInput>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Email</mat-label>
+                                    <input type="email" formControlName="email" matInput>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Password</mat-label>
+                                    <input type="password" formControlName="password" matInput>
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><button type="submit" [disabled]="form.invalid" mat-flat-button
+                                    color="primary">Create</button>
+                        </tr>
+                    </table>
+                </form>
+            </div>
         </div>
     </div>
 </div>

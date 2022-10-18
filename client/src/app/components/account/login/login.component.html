@@ -1,10 +1,10 @@
 <div class="container align-center">
     <div class="row" *ngIf="!isLoggedIn">
         <div class="col">
-            <mat-spinner *ngIf="isLoading"></mat-spinner>
+            <p><mat-spinner *ngIf="isLoading"></mat-spinner></p>
             <div *ngIf="!isLoading">
                 <h1>Sign In</h1>
-                <h2>Don't have an account? <a [routerLink]="['/account/create']">Sign up</a></h2>
+                <h2>Don't have an account? <button [routerLink]="['/account/create']" mat-raised-button color="primary">Sign up</button></h2>
                 <div><span style="color: red;">{{errorMsg}}</span></div>
                 <form [formGroup]="form" (ngSubmit)="onSubmitForm()">
                     <table class="table">
@@ -30,7 +30,7 @@
                         </tr>
                     </table>
                 </form>
-                <asl-google-signin-button type='standard' text='signin_with'></asl-google-signin-button>
+                <p align="center"><asl-google-signin-button type='standard' text='signin_with'></asl-google-signin-button></p>
             </div>
         </div>
     </div>

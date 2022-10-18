@@ -1,22 +1,35 @@
 <mat-toolbar color="primary">
     <mat-toolbar-row>
-        <a [routerLink]="['/']" class="remove-text-style"><span>MyRecipe v0.2.5</span></a>
+        <a [routerLink]="['/']" class="remove-text-style"><span>MyRecipe</span></a>
         <span class="example-spacer"></span>
-        <div *ngIf="!isLoggedIn">
-            <button type="button" [routerLink]="['/']" mat-button>Log In</button>
-            <button type="button" [routerLink]="['/account/create']" mat-button>Sign Up</button>
-        </div>
         <div *ngIf="isLoggedIn">
-            <button type="button" [routerLink]="['search']" mat-button>Search</button>
-            <button type="button" [routerLink]="['/profile']" mat-button>View Profile</button>
-            <button type="button" [routerLink]="['/account/recipe/create']" mat-button>Create Recipe</button>
-            <button type="button" (click)="logOut()" mat-button>Sign out</button>
+            <button mat-icon-button class="example-icon" [matMenuTriggerFor]="menu" aria-label="Example icon-button with menu icon">
+                <mat-icon>menu</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item [routerLink]="['/profile']">
+                  <mat-icon>person</mat-icon>
+                  <span>{{username}}</span>
+                </button>
+                <button mat-menu-item [routerLink]="['/search']">
+                    <mat-icon>search</mat-icon>
+                    <span>Search Recipe</span>
+                  </button>
+                <button mat-menu-item [routerLink]="['/account/recipe/create']">
+                  <mat-icon>edit_square</mat-icon>
+                  <span>Create Recipe</span>
+                </button>
+                <button mat-menu-item (click)="logOut()">
+                  <mat-icon>logout</mat-icon>
+                  <span>Sign out</span>
+                </button>
+              </mat-menu>
         </div>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-            <mat-icon>menu</mat-icon>
-        </button>
     </mat-toolbar-row>
 </mat-toolbar>
-<div>
-</div>
 <router-outlet></router-outlet>
+<mat-sidenav-container>
+  <div class="footer">
+    <p>v0.2.9</p>
+  </div>
+</mat-sidenav-container>

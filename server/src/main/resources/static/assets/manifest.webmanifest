@@ -1,7 +1,7 @@
 {
-    "theme_color": "#863bc8",
-    "background_color": "#5d07a8",
-    "display": "fullscreen",
+    "theme_color": "#f69435",
+    "background_color": "#f69435",
+    "display": "standalone",
     "scope": "/",
     "start_url": "/",
     "name": "MyRecipe",

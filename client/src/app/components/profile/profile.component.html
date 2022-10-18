@@ -1,136 +1,160 @@
-<div class="container">
-    <div class="row" *ngIf="isLoggedIn">
+<div class="container align-center">
+    <div class="row mt-5" *ngIf="isLoggedIn">
         <div class="col">
-            <h1>Welcome {{username}}!</h1>
-            <div class="container"*ngIf="!isEditing">
-                <h2>Your recipes</h2>
-                <mat-spinner *ngIf="isLoading"></mat-spinner>
+            <div class="container" *ngIf="!isEditing">
+                <h1>Welcome {{username}}!</h1>
+                <h2>Your Recipes</h2>
+                <p align="center"><mat-spinner *ngIf="isLoading"></mat-spinner></p>
                 <div *ngIf="recipes.length <= 0">
-                    <p>You do not have any recipes. <a [routerLink]="['/account/recipe/create']">Create</a> now!</p>
+                    <p>You do not have any recipes!</p>
+                    <p><button mat-fab color="primary" [routerLink]="['/account/recipe/create']">
+                            <mat-icon>add</mat-icon>
+                        </button></p>
                 </div>
                 <div *ngIf="!isLoading">
-                    <mat-grid-list cols="3" rowHeight="1:1">
-                        <mat-grid-tile *ngFor="let r of recipes">
-                            <table>
-                                <tr>
-                                    <td>
-                                        <button type="button" (click)="onEdit(r.recipeId)" mat-flat-button
-                                            color="primary">Edit</button>
-                                        <button type="button" (click)="onDelete(r.recipeId)" mat-flat-button
-                                            color="warn">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a [routerLink]="['/recipe', 'user', r.recipeId]">
-                                            <img *ngIf="!r.user" src="{{r.thumbnail}}" width="200" height="auto">
-                                            <img *ngIf="r.user" src="/thumbnails/{{r.thumbnail}}" width="200" height="auto">
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><a [routerLink]="['/recipe', 'user', r.recipeId]">{{r.name}}</a></td>
-                                </tr>
-                            </table>
-                        </mat-grid-tile>
-                    </mat-grid-list>
+                    <div class="row">
+                        <div class="col-md-auto" *ngFor="let r of recipes">
+                            <p align="right">
+                                <button mat-icon-button class="example-icon" [matMenuTriggerFor]="menu"
+                                    aria-label="settings" color="primary">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                                <mat-menu #menu="matMenu">
+                                    <button mat-menu-item (click)="onEdit(r.recipeId)" style="color:purple;">
+                                        <mat-icon style="color:purple;">edit</mat-icon>
+                                        <span>Edit</span>
+                                    </button>
+                                    <button mat-menu-item (click)="onDelete(r.recipeId)" style="color:red;">
+                                        <mat-icon style="color:red;">delete</mat-icon>
+                                        <span>Delete</span>
+                                    </button>
+                                </mat-menu>
+                            </p>
+                            <p>
+                                <a [routerLink]="['/recipe', 'user', r.recipeId]">
+                                    <img *ngIf="!r.user" src="{{r.thumbnail}}" width="200" height="auto">
+                                    <img *ngIf="r.user" src="/thumbnails/{{r.thumbnail}}" width="200" height="auto"></a>
+                            </p>
+                            <p><a [routerLink]="['/recipe', 'user', r.recipeId]">{{r.name}}</a></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="container align-center" *ngIf="isEditing">
-            <button type="button" mat-flat-button color="primary" (click)="cancelEdit()">Back</button>
-            <h2>Edit recipe</h2>
-            <mat-spinner *ngIf="isLoading"></mat-spinner>
-            <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmitEdit()">
-                <input type="hidden" formControlName="recipeId">
-                <table class="table">
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="outline">
-                                <mat-label>Name</mat-label>
-                                <input type="text" formControlName="name" matInput>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="file" accept="image/*" formControlName="thumbnail" #file>
-                            <p><img src="/thumbnails/{{oldThumbnail}}" width="200" height="auto"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="fill">
-                                <mat-label>Category</mat-label>
-                                <mat-select name="category" formControlName="category">
-                                  <mat-option *ngFor="let c of categories" [value]="c">
-                                    {{c}}
-                                  </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="fill">
-                                <mat-label>Area</mat-label>
-                                <mat-select name="area" formControlName="area">
-                                  <mat-option *ngFor="let a of areas" [value]="a">
-                                    {{a}}
-                                  </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="fill">
-                                <mat-label>Instructions</mat-label>
-                                <textarea matInput cols="80" rows="5" formControlName="instructions"></textarea>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <mat-form-field appearance="outline">
-                                <mat-label>Youtube link</mat-label>
-                                <input type="url" formControlName="youtubeLink" matInput>
-                            </mat-form-field>
-                        </td>
-                    </tr>
-                </table>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Ingredients</th>
-                            <th></th>
-                            <th>
-                                <button type="button" (click)="onAddIngredient()" mat-flat-button color="primary">+</button>
-                            </th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody formArrayName="ingredients">
-                        <tr *ngFor="let ingredient of ingredientsArray.controls; let i = index"
-                            [formGroup]="ingredient">
-                            <td>
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Measurement</mat-label>
-                                    <input type="text" formControlName="measurement" matInput>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Ingredient</mat-label>
-                                    <input type="text" formControlName="ingredient" matInput>
-                                </mat-form-field>
-                            </td>
-                            <td><button type="button" (click)="onRemoveIngredient(i)" mat-flat-button color="primary">x</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="submit" [disabled]="form.invalid" mat-flat-button color="primary">Submit</button>
-            </form>
+            <div class="row">
+                <div class="col" *ngIf="!isLoading">
+                    <button type="button" mat-mini-fab color="primary" (click)="cancelEdit()">
+                        <mat-icon>arrow_back</mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 class="mt-3">Edit recipe</h2>
+                    <p align="center">
+                        <mat-spinner *ngIf="isLoading"></mat-spinner>
+                    </p>
+                    <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmitEdit()">
+                        <input type="hidden" formControlName="recipeId">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Name</mat-label>
+                                        <input type="text" formControlName="name" matInput>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="file" accept="image/*" formControlName="thumbnail" #file>
+                                    <p><img src="/thumbnails/{{oldThumbnail}}" width="200" height="auto"></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="fill">
+                                        <mat-label>Category</mat-label>
+                                        <mat-select name="category" formControlName="category">
+                                            <mat-option *ngFor="let c of categories" [value]="c">
+                                                {{c}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="fill">
+                                        <mat-label>Area</mat-label>
+                                        <mat-select name="area" formControlName="area">
+                                            <mat-option *ngFor="let a of areas" [value]="a">
+                                                {{a}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="fill" style="width: 80%;">
+                                        <mat-label>Instructions</mat-label>
+                                        <textarea matInput rows="10" formControlName="instructions"></textarea>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Youtube link</mat-label>
+                                        <input type="url" formControlName="youtubeLink" matInput>
+                                    </mat-form-field>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="row">
+                            <h2>Ingredients</h2>
+                            <div class="col" formArrayName="ingredients">
+                                <div class="row mt-3"
+                                    *ngFor="let ingredient of ingredientsArray.controls; let i = index"
+                                    [formGroup]="ingredient">
+                                    <div class="col">
+                                        <mat-form-field appearance="outline" style="width: 90%">
+                                            <mat-label>Measurement</mat-label>
+                                            <input type="text" formControlName="measurement" matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col">
+                                        <mat-form-field appearance="outline" style="width: 90%">
+                                            <mat-label>Ingredient</mat-label>
+                                            <input type="text" formControlName="ingredient" matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col-md-auto">
+                                        <button type="button" (click)="onRemoveIngredient(i)" mat-mini-fab
+                                            color="primary">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <button type="button" (click)="onAddIngredient()" mat-fab color="primary">
+                                    <mat-icon>add_circle</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-5 mb-5">
+                            <div class="col">
+                                <button type="submit" [disabled]="form.invalid" mat-flat-button color="primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

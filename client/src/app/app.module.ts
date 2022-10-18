@@ -9,7 +9,7 @@ import { SearchComponent } from './components/search/search.component';
 import { ListRecipesComponent } from './components/list-recipes/list-recipes.component';
 import { MealDbService } from './services/mealdb.service';
 import { RecipeComponent } from './components/recipe/recipe.component';
-import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider, FacebookLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
 import { CreateComponent } from './components/account/create/create.component';
 import { LoginComponent } from './components/account/login/login.component';
 import { AccountService } from './services/account.service';
@@ -65,6 +65,10 @@ const appRoutes : Routes = [
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider('942508289464-7dfn185umum2qefq9ftt7smk34p6p7gs.apps.googleusercontent.com'),
           },
+          {
+            id: FacebookLoginProvider.PROVIDER_ID,
+            provider: new FacebookLoginProvider('648350570237297')
+          }
         ],
       } as SocialAuthServiceConfig,
   }],

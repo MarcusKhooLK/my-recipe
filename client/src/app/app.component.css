@@ -5,3 +5,13 @@
     color: white;
     text-decoration: none; /* no underline */
 }
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 2.5%;
+    background-color: rgb(103, 58, 183);
+    color:white;
+    text-align: center;
+    margin: 0px;
+}

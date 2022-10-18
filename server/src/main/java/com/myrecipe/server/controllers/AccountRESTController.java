@@ -83,8 +83,8 @@ public class AccountRESTController {
                 r.setData(data);
                 return ResponseEntity.ok().body(r.toJson().toString());
             } else {
-                r.setCode(HttpStatus.FORBIDDEN.value());
-                r.setMessage("Forbidden");
+                r.setCode(HttpStatus.NOT_FOUND.value());
+                r.setMessage("Account already exists");
                 return ResponseEntity.status(r.getCode()).body(r.toJson().toString());
             }
         }

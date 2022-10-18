@@ -1,4 +1,4 @@
-import { GoogleLoginProvider, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
+import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup
   isLoggedIn: boolean = false
   errorMsg: string = ""
+  user!: SocialUser
 
   isLoading: boolean = false
 
@@ -26,13 +27,29 @@ export class LoginComponent implements OnInit {
       return
     }
 
+    this.form = this.createForm()
+
     this.socialAuthService.authState.subscribe((user) => {
-      if(user){
+      if(user) {
+        this.user = user;
         this.isLoading = true
+        this.accSvc.socialLogin(user.email, user.name, user.id)
+        .then(result=> {
+          this.isLoading = false
+          this.isLoggedIn = true
+          localStorage.setItem('email', user.email);
+          localStorage.setItem('username', user.name)
+          this.router.navigate(['/profile'])
+          this.accSvc.socialLoginEvent.next(user)
+        })
+        .catch(error=>{
+          this.socialAuthService.signOut()
+          this.isLoading = false
+          this.isLoggedIn = false
+          this.errorMsg = "Account already exists"
+        })
       }
     });
-
-    this.form = this.createForm()
   }
 
   private createForm() {
@@ -48,16 +65,21 @@ export class LoginComponent implements OnInit {
     this.isLoading = true
     this.accSvc.auth(email, pwd)
     .then(result=>{
+      this.accSvc.onLoginEvent.next(result.data.username)
       this.isLoading = false
-      console.info(">>> result: ", result)
-      this.accSvc.onLogin.next(result)
+      this.isLoggedIn = true
+      localStorage.setItem('email', result.data.email)
+      localStorage.setItem('username', result.data.username)
       this.router.navigate(['/profile'])
     })
     .catch(error=>{
       this.isLoading = false
-      console.error(">>> error: ", error)
       this.errorMsg = "Invalid credentials"
     })
+  }
+
+  signInWithFB() {
+    this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);
   }
 
 }

@@ -1,3 +1,4 @@
+import { SocialUser } from "@abacritt/angularx-social-login";
 import { HttpClient } from "@angular/common/http";
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
 import { firstValueFrom, Subject } from "rxjs";
@@ -6,7 +7,8 @@ import { Response } from 'src/app/models/response'
 @Injectable()
 export class AccountService implements OnInit, OnDestroy{
 
-    onLogin = new Subject<Response>()
+    socialLoginEvent = new Subject<SocialUser>()
+    onLoginEvent = new Subject<string>()
 
     constructor(private httpClient: HttpClient) {}
     ngOnInit(): void {

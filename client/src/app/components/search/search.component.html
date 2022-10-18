@@ -1,32 +1,38 @@
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <h1>Search</h1>
+    <div class="row mt-5">
+        <div class="col align-center">
+            <h1>Search Recipes</h1>
             <form [formGroup]="form" (ngSubmit)="onSearch()">
-                <mat-form-field appearance="fill">
-                    <mat-label>Search recipes</mat-label>
+                <mat-form-field appearance="fill" style="width: 80%;">
+                    <mat-label>Search</mat-label>
                     <input text="text" formControlName="search" matInput>
+                    <button type="submit" matSuffix mat-icon-button color="primary">
+                        <mat-icon>search</mat-icon>
+                    </button>
                 </mat-form-field>
-                <button type="submit" mat-flat-button color="primary">Search</button>
             </form>
         </div>
     </div>
     <div class="row">
-        <div class="col">
+        <div class="col align-center">
             <h1>Suggestions</h1>
-            <p>Category</p>
-            <mat-spinner *ngIf="isLoadingCat"></mat-spinner>
-            <div *ngFor="let a of areas">
-                <button [routerLink]="['/recipes/area', a]" mat-button>
-                    {{a}}
-                </button>
+            <h2 class="border-bottom">Area</h2>
+            <div class="row border border-2 rounded-3">
+                <p align="center"><mat-spinner *ngIf="isLoadingArea"></mat-spinner></p>
+                <div class="col-md-auto" *ngFor="let a of areas">
+                    <button [routerLink]="['/recipes/area', a]" mat-button color="primary">
+                        {{a}}
+                    </button>
+                </div>
             </div>
-            <p>Area</p>
-            <mat-spinner *ngIf="isLoadingArea"></mat-spinner>
-            <div *ngFor="let c of categories">
-                <button [routerLink]="['/recipes/category', c]" mat-button>
-                    {{c}}
-                </button>
+            <h2 class="mt-5 border-bottom">Category</h2>
+            <div class="row border border-2 rounded-3">
+                <p align="center"><mat-spinner *ngIf="isLoadingCat"></mat-spinner></p>
+                <div class="col-md-auto" *ngFor="let c of categories">
+                    <button [routerLink]="['/recipes/category', c]" mat-button color="primary">
+                        {{c}}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

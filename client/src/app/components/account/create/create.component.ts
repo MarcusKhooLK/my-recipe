@@ -43,7 +43,10 @@ export class CreateComponent implements OnInit {
     this.isLoading = true
     this.accSvc.createAccount(username, email, pwd)
     .then(result=>{
-      this.router.navigate(['/'])
+      this.isLoading = false
+      if(confirm("Account created successfull!")) {
+        this.router.navigate(['/'])
+      }
     })
     .catch(error=>{
       this.isLoading = false;
