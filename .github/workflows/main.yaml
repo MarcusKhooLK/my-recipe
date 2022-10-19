@@ -49,3 +49,18 @@ jobs:
           deliverables: 'pom.xml'
       - id: 'test'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
+  deploy_to_heroku:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 
+      uses: actions/checkout@v2
+    - name: Echo branch
+      run: echo "Branch ${{ github.ref_name }}"
+    - name: Deploy
+      uses: akhileshns/heroku-deploy@v3.12.12 
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        branch: ${{ github.ref_name }}
+        appdir: "server" # <- This will point to the api folder in your project
