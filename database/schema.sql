@@ -9,6 +9,7 @@ create table user(
     username varchar(20) not null,
     email varchar(128) not null,
     password varchar(286) not null,
+    newsletter boolean not null,
     primary key(user_id)
 );
 
