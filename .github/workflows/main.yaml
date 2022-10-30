@@ -37,6 +37,9 @@ jobs:
           SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH }}
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE }}
+          SPRING_REDIS_HOST: ${{ secrets.SPRING_REDIS_HOST }}
+          SPRING_REDIS_PORT: ${{ secrets.SPRING_REDIS_PORT }}
+          SPRING_REDIS_PASSWORD: ${{ secrets.SPRING_REDIS_PASSWORD }}
         with:
           app_yaml_path: 'server/src/main/appengine/app.yaml'
       - uses: 'google-github-actions/auth@v0'
