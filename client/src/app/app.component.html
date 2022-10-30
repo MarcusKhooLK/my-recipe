@@ -19,6 +19,10 @@
                   <mat-icon>edit_square</mat-icon>
                   <span>Create Recipe</span>
                 </button>
+                <button mat-menu-item [routerLink]="['/account/settings']">
+                  <mat-icon>settings</mat-icon>
+                  <span>Settings</span>
+                </button>
                 <button mat-menu-item (click)="logOut()">
                   <mat-icon>logout</mat-icon>
                   <span>Sign out</span>

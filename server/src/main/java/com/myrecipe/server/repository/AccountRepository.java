@@ -1,7 +1,5 @@
 package com.myrecipe.server.repository;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +12,24 @@ import com.myrecipe.server.models.User;
 @Repository
 public class AccountRepository {
     
-    private static final String SQL_INSERT_USER = "insert into user (username, email, password) values (?, ?, sha1(?));";
+    private static final String SQL_INSERT_USER = "insert into user (username, email, password, newsletter) values (?, ?, sha1(?), ?);";
     private static final String SQL_AUTHORIZE_USER = "select * from user where email = ? and password = sha1(?);";
     private static final String SQL_SELECT_USER_BY_EMAIL = "select * from user where email = ?;";
+    private static final String SQL_DELETE_USER = "delete from user where user_id = ?";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     public int createUser(String username, String email, String password) {
-        return jdbcTemplate.update(SQL_INSERT_USER, username, email, password);
+        return jdbcTemplate.update(SQL_INSERT_USER, username, email, password, true);
     }
 
-    public Map<String, Object> authUser(String email, String password) {
+    public Optional<User> authUser(String email, String password) {
         final SqlRowSet result = jdbcTemplate.queryForRowSet(SQL_AUTHORIZE_USER, email, password);
         if(result.next()) {
-            Map<String, Object> hashMap = new HashMap<>();
-            hashMap.put("email", result.getString("email"));
-            hashMap.put("username", result.getString("username"));
-            return hashMap;
+            return Optional.of(User.create(result));
         }
-        return new HashMap<>();
+        return Optional.empty();
     }
 
     public boolean userExists(String email) {
@@ -48,5 +44,16 @@ public class AccountRepository {
         } else {
             return Optional.empty();
         }
+    }
+
+    public boolean deleteAccount(String email) {
+        Optional<User> userOpt = findUserByEmail(email);
+        if(userOpt.isEmpty()) {
+            return false;
+        }
+
+        int result = jdbcTemplate.update(SQL_DELETE_USER, userOpt.get().getUserId());
+
+        return result > 0;
     }
 }

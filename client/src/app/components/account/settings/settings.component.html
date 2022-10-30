@@ -1,0 +1,13 @@
+<div class="container" style="text-align: center;">
+    <div class="row" *ngIf="isLoggedIn">
+        <div class="col">
+            <p align="center">
+                <mat-spinner *ngIf="isLoading"></mat-spinner>
+            </p>
+            <div *ngIf="!isLoading">
+                <h1>Settings</h1>
+                <button type="button" mat-flat-button color="warn" (click)="onDeleteAccount()">Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>

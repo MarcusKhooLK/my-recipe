@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AccountService } from 'src/app/services/account.service';
 import { MealDbService } from 'src/app/services/mealdb.service';
 import { MyRecipeService } from 'src/app/services/my-recipe.service';
 
@@ -25,31 +26,37 @@ export class CreateRecipeComponent implements OnInit {
 
   isLoading: boolean = true
 
-  constructor(private fb: FormBuilder, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router) { }
+  constructor(private fb: FormBuilder, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router, private accSvc: AccountService) { }
 
   ngOnInit(): void {
-    this.isLoggedIn = localStorage.getItem('email') !== null
-    if(this.isLoggedIn === false) {
+    const sessionId = localStorage.getItem("sessionId") ?? ''
+    this.accSvc.authSession(sessionId)
+    .then(result=>{
+      this.accSvc.isLoggedIn = this.isLoggedIn = true
+      this.accSvc.userLoggedIn = result.data
+      this.isLoading = false;
+
+      this.mealDbSvc.getAllAreas()
+      .then(result=>{
+        this.areas = result;
+      })
+      .catch(error=>{
+        console.error(">>> error: ", error)
+      })
+  
+      this.mealDbSvc.getAllCategories()
+      .then(result=>{
+        this.categories = result;
+        this.isLoading = false;
+      })
+      .catch(error=>{
+        console.error(">>> error: ", error)
+        this.isLoading = false;
+      })
+    })
+    .catch(error=>{
       this.router.navigate(['/'])
-      return
-    }
-
-    this.mealDbSvc.getAllAreas()
-    .then(result=>{
-      this.areas = result;
-    })
-    .catch(error=>{
-      console.error(">>> error: ", error)
-    })
-
-    this.mealDbSvc.getAllCategories()
-    .then(result=>{
-      this.categories = result;
-      this.isLoading = false;
-    })
-    .catch(error=>{
-      console.error(">>> error: ", error)
-      this.isLoading = false;
+      console.error("error >>>> ", error)
     })
 
     this.form = this.createForm()
@@ -97,7 +104,7 @@ export class CreateRecipeComponent implements OnInit {
     formData.set('youtubeLink', this.form.get('youtubeLink')?.value)
     formData.set('ingredients', ingredientsArray.join(','))
     formData.set('measurements', measurementsArray.join(','))
-    formData.set('email', localStorage.getItem('email') ?? '')
+    formData.set('email', this.accSvc.userLoggedIn?.email ?? '')
 
     this.isLoading = true;
 
@@ -110,6 +117,7 @@ export class CreateRecipeComponent implements OnInit {
     })
     .catch(error=>{
       console.log(">>> error: ", error)
+      alert(`Failed to create recipe: ${JSON.stringify(error)}`)
       this.isLoading = false;
     })
   }

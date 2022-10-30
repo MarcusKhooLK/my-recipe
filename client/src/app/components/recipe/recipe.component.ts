@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Recipe } from 'src/app/models/recipe';
+import { AccountService } from 'src/app/services/account.service';
 import { MealDbService } from 'src/app/services/mealdb.service';
 import { MyRecipeService } from 'src/app/services/my-recipe.service';
 
@@ -14,13 +15,11 @@ export class RecipeComponent implements OnInit {
   recipe!: Recipe
   isLoading: boolean = true;
 
-  constructor(private activatedRoute: ActivatedRoute, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router) { }
+  constructor(private activatedRoute: ActivatedRoute, private mealDbSvc: MealDbService, private myRecipeSvc: MyRecipeService, private router: Router, private accSvc:AccountService) { }
 
   ngOnInit(): void {
     const recipeId: string = this.activatedRoute.snapshot.params['recipeId']
     const username: string = this.activatedRoute.snapshot.params['user']
-    console.info(">>> recipedId: ", recipeId)
-    console.info(">>> usnerame: ", username)
     if (username) {
       this.myRecipeSvc.getRecipe(recipeId)
       .then(result => {

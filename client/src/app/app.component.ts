@@ -13,46 +13,58 @@ import { AccountService } from './services/account.service';
 export class AppComponent implements OnInit, OnDestroy {
 
   isLoggedIn: boolean = false;
-  user!:SocialUser | null
-  username!:string
-
-  onSocialLoginSub$!: Subscription
+  username!: string
+  onLoginSub$!: Subscription
+  onLogoutSub$!: Subscription
 
   form!: FormGroup
 
-  constructor(private socialAuthService: SocialAuthService, private accSvc:AccountService, private router: Router, private fb: FormBuilder) {}
+  constructor(private socialAuthService: SocialAuthService, private accSvc: AccountService, private router: Router) { }
 
   ngOnInit() {
-    this.isLoggedIn = localStorage.getItem('email') !== null
-    this.username = localStorage.getItem('username') ?? ''
-    this.onSocialLoginSub$ = this.accSvc.socialLoginEvent.subscribe(user=>{
-      this.user = user
-      this.isLoggedIn = true
-      this.username = user.name
+    const sessionId = localStorage.getItem("sessionId") ?? ''
+    if (sessionId) {
+      this.accSvc.authSession(sessionId)
+        .then(result => {
+          this.accSvc.isLoggedIn = this.isLoggedIn = true
+          this.accSvc.userLoggedIn = result.data
+          this.username = result.data.username
+        })
+        .catch(error => {
+        })
+    }
+    this.onLoginSub$ = this.accSvc.onLoginEvent.subscribe(user => {
+      this.accSvc.userLoggedIn = user
+      this.username = user.username
+      this.isLoggedIn = this.accSvc.isLoggedIn = true
+      localStorage.setItem("sessionId", user.sessionId)
     })
-    this.onSocialLoginSub$ = this.accSvc.onLoginEvent.subscribe(username=>{
-      this.isLoggedIn = true
-      this.username = username
+    this.onLogoutSub$ = this.accSvc.onLogoutEvent.subscribe(nothing => {
+      this.logOut()
     })
   }
 
   ngOnDestroy(): void {
     localStorage.clear()
-    this.onSocialLoginSub$.unsubscribe()
+    this.onLoginSub$.unsubscribe()
+    this.onLogoutSub$.unsubscribe()
+
+    const sessionId = localStorage.getItem("sessionId") ?? ''
+    if (sessionId) this.accSvc.destroySession(sessionId)
   }
 
   logOut(): void {
-    if(this.user) {
-      this.socialAuthService.signOut()
-      this.user = null
-    }
-    localStorage.removeItem('email')
-    localStorage.removeItem('username')
+    localStorage.clear()
+    this.accSvc.logout()
+    this.socialAuthService.signOut()
+      .then(result => {
+        console.log("log out successfully!")
+      })
+      .catch(error => {
+        console.log("log out unsuccssful. No social user")
+      })
+    this.username = ""
     this.isLoggedIn = false
     this.router.navigate(['/'])
-  }
-
-  onSearch(){
-    
   }
 }

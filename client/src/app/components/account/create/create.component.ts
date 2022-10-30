@@ -19,12 +19,19 @@ export class CreateComponent implements OnInit {
   constructor(private fb: FormBuilder, private accSvc: AccountService, private router: Router) { }
 
   ngOnInit(): void {
-    this.isLoggedIn = localStorage.getItem('email') !== null
-    if(this.isLoggedIn) {
-      this.router.navigate(['/profile'])
-      return
+    const sessionId = localStorage.getItem("sessionId") ?? ''
+    if (sessionId) {
+      this.accSvc.authSession(sessionId)
+        .then(result => {
+          this.accSvc.isLoggedIn = this.isLoggedIn = true
+          this.accSvc.userLoggedIn = result.data
+          this.isLoading = false;
+          this.router.navigate(['/profile'])
+        })
+        .catch(error => {
+          this.router.navigate(['/'])
+        })
     }
-
     this.form = this.createForm()
   }
 
@@ -44,9 +51,8 @@ export class CreateComponent implements OnInit {
     this.accSvc.createAccount(username, email, pwd)
     .then(result=>{
       this.isLoading = false
-      if(confirm("Account created successfull!")) {
-        this.router.navigate(['/'])
-      }
+      alert("Account created successfull!")
+      this.router.navigate(['/'])
     })
     .catch(error=>{
       this.isLoading = false;

@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Recipe } from 'src/app/models/recipe';
 import { RecipeSummary } from 'src/app/models/recipesummary';
+import { AccountService } from 'src/app/services/account.service';
 import { MealDbService } from 'src/app/services/mealdb.service';
 import { MyRecipeService } from 'src/app/services/my-recipe.service';
 
@@ -27,33 +28,42 @@ export class ProfileComponent implements OnInit {
   @ViewChild('file')
   thumbnailImage!: ElementRef
 
-  constructor(private router: Router, private myRecipeSvc: MyRecipeService, private fb: FormBuilder, private mealDbSvc: MealDbService) { }
+  constructor(private router: Router, private myRecipeSvc: MyRecipeService, private fb: FormBuilder, private mealDbSvc: MealDbService, private accSvc:AccountService) { }
 
   ngOnInit(): void {
-    this.isLoggedIn = localStorage.getItem('email') !== null
-    if(this.isLoggedIn === false) {
-      this.router.navigate(['/'])
-      return
-    }
-    this.username = localStorage.getItem('username') ?? ''
-    this.mealDbSvc.getAllAreas()
+    
+    const sessionId = localStorage.getItem("sessionId") ?? ''
+    this.accSvc.authSession(sessionId)
     .then(result=>{
-      this.areas = result;
-    })
-    .then(result=>{
-      this.mealDbSvc.getAllCategories()
+      this.accSvc.isLoggedIn = this.isLoggedIn = true
+      this.accSvc.userLoggedIn = result.data
+      this.isLoading = false;
+
+      this.username = this.accSvc.userLoggedIn?.username ?? ''
+      this.mealDbSvc.getAllAreas()
       .then(result=>{
-        this.categories = result;
+        this.areas = result;
+      })
+      .then(result=>{
+        this.mealDbSvc.getAllCategories()
+        .then(result=>{
+          this.categories = result;
+        })
+        .catch(error=>{
+          console.error(">>> error: ", error)
+        })
       })
       .catch(error=>{
         console.error(">>> error: ", error)
       })
+  
+      this.updateRecipes()
     })
     .catch(error=>{
-      console.error(">>> error: ", error)
+      this.router.navigate(['/'])
+      console.error("error >>>> ", error)
     })
 
-    this.updateRecipes()
     this.form = this.createForm()
   }
 
@@ -113,7 +123,7 @@ export class ProfileComponent implements OnInit {
     if(confirm('Are you sure?')) {
       console.info(">>> onDelete: ", recipeId)
       this.isLoading = true
-      this.myRecipeSvc.deleteRecipeByRecipeId(recipeId, localStorage.getItem('email')??'')
+      this.myRecipeSvc.deleteRecipeByRecipeId(recipeId, this.accSvc.userLoggedIn?.email ?? '')
       .then(result=>{
         console.info(">>> result ", result)
         this.updateRecipes()
@@ -148,7 +158,7 @@ export class ProfileComponent implements OnInit {
     formData.set('youtubeLink', this.form.get('youtubeLink')?.value)
     formData.set('ingredients', ingredientsArray.join(','))
     formData.set('measurements', measurementsArray.join(','))
-    formData.set('email', localStorage.getItem('email') ?? '')
+    formData.set('email', this.accSvc.userLoggedIn?.email ?? '')
 
     this.isLoading = true;
 
@@ -166,7 +176,7 @@ export class ProfileComponent implements OnInit {
   }
 
   private updateRecipes() {
-    this.myRecipeSvc.getRecipeSummaryByEmail(localStorage.getItem('email') ?? '')
+    this.myRecipeSvc.getRecipeSummaryByEmail(this.accSvc.userLoggedIn?.email ?? '')
     .then(result=>{
       this.recipes = result
       this.recipes.forEach(v=>{

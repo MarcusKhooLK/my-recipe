@@ -19,11 +19,13 @@ import { MyRecipeService } from './services/my-recipe.service';
 import { NotFoundComponent } from './components/error/not-found.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material.module';
+import { SettingsComponent } from './components/account/settings/settings.component';
 
 const appRoutes : Routes = [
   {path:"", component: LoginComponent},
   {path:"profile", component: ProfileComponent},
   {path:"account/create", component: CreateComponent},
+  {path:"account/settings", component: SettingsComponent},
   {path:"account/recipe/create", component:CreateRecipeComponent},
   {path:"search", component:SearchComponent},
   {path:"recipes", component: ListRecipesComponent},
@@ -44,7 +46,8 @@ const appRoutes : Routes = [
     LoginComponent,
     ProfileComponent,
     CreateRecipeComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -64,10 +67,6 @@ const appRoutes : Routes = [
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider('942508289464-7dfn185umum2qefq9ftt7smk34p6p7gs.apps.googleusercontent.com'),
-          },
-          {
-            id: FacebookLoginProvider.PROVIDER_ID,
-            provider: new FacebookLoginProvider('648350570237297')
           }
         ],
       } as SocialAuthServiceConfig,

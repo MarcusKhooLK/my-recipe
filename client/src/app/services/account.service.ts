@@ -1,21 +1,26 @@
-import { SocialUser } from "@abacritt/angularx-social-login";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
 import { firstValueFrom, Subject } from "rxjs";
 import { Response } from 'src/app/models/response'
+import { User } from "../models/myuser";
 
 @Injectable()
-export class AccountService implements OnInit, OnDestroy{
+export class AccountService {
 
-    socialLoginEvent = new Subject<SocialUser>()
-    onLoginEvent = new Subject<string>()
+    userLoggedIn!:User | null
+
+    onLoginEvent = new Subject<User>()
+    onLogoutEvent = new Subject<void>()
+
+    isLoggedIn : boolean = false;
 
     constructor(private httpClient: HttpClient) {}
-    ngOnInit(): void {
-        console.info(" AccountService onInit")
-    }
-    ngOnDestroy(): void {
-        console.info("AccountService onDestroy")
+
+    logout() {
+        this.userLoggedIn = null
+        this.isLoggedIn = false
+        const sessionId = localStorage.getItem("sessionId") ?? ''
+        if(sessionId) this.destroySession(sessionId)
     }
 
     createAccount(username: string, email:string, password:string) : Promise<Response> {
@@ -34,11 +39,36 @@ export class AccountService implements OnInit, OnDestroy{
         ) 
     }
 
+    authSession(sessionId:string) : Promise<Response> {
+        return firstValueFrom(
+            this.httpClient.post<Response>(
+                '/api/account/authsession', {sessionId}
+            )
+        ) 
+    }
+
+    destroySession(sessionId: string) : Promise<Response> {
+        return firstValueFrom(
+            this.httpClient.delete<Response>(
+                '/api/account/authsession', {body: sessionId}
+            )
+        )
+    }
+
     socialLogin(email: string, username: string, token: string) {
         return firstValueFrom(
             this.httpClient.post<Response>(
                 '/api/account/authsocial', {email, username, token}
             )
+        )
+    }
+
+    deleteAccount(email: string) {
+        const headers = new HttpHeaders()
+            .set('Accept', 'application/json')
+            .set('Content-Type', 'application/json')
+        return firstValueFrom(
+            this.httpClient.delete<Response>('/api/account', { headers, body: email })
         )
     }
 }

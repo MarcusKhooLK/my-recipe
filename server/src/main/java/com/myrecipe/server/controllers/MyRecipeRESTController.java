@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.myrecipe.server.EmailDetails;
+import com.myrecipe.server.constants.EmailTemplate;
 import com.myrecipe.server.constants.URLs;
 import com.myrecipe.server.models.Recipe;
 import com.myrecipe.server.models.RecipeSummary;
@@ -57,9 +58,13 @@ public class MyRecipeRESTController {
             @RequestPart String measurements,
             @RequestPart String email) {
 
+        Response resp = new Response();
+
         Optional<String> thumbnailOpt = s3Svc.upload(file, email);
         if (thumbnailOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            resp.setCode(HttpStatus.BAD_REQUEST.value());
+            resp.setMessage("Something went wrong when creating recipe! Failed to upload thumbnail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
         }
 
         Recipe r = new Recipe();
@@ -77,21 +82,7 @@ public class MyRecipeRESTController {
         int recipeId = myRecipeSvc.createRecipe(r, email);
 
         if (recipeId > 0) {
-            String msgBody = """
-                    <div style="text-align:center;">
-                    <h1>Nicely done!</h1>
-                    <p>You have created your own %s recipe and is now available for cooks around the world to try it!</p>
-                    <p><img src="%s"></p>
-                    <a href="%s" style="
-                    background-color: orange;
-                    color: white;
-                    padding: 15px 25px;
-                    text-decoration: none;
-                    cursor: pointer;
-                    border: none;
-                    border-radius: 10px;">View Recipe</a>
-                    </div>
-                    """.formatted(
+            String msgBody = EmailTemplate.constructRecipeCreated(
                         r.getName(),
                         URLs.URL_DO_THUMBNAILS + "/" + thumbnailOpt.get(),
                         URLs.URL_HOME + "/#/recipe/user/" + recipeId);
@@ -99,14 +90,16 @@ public class MyRecipeRESTController {
             EmailDetails details = new EmailDetails(email, msgBody, subject);
             emailSvc.sendEmail(details);
 
-            Response resp = new Response();
             resp.setCode(HttpStatus.CREATED.value());
             resp.setMessage("Recipe created");
             JsonObject data = Json.createObjectBuilder().add("recipeId", recipeId).build();
             resp.setData(data);
             return ResponseEntity.status(HttpStatus.CREATED).body(resp.toJson().toString());
         } else {
-            return ResponseEntity.badRequest().build();
+            s3Svc.delete(thumbnailOpt.get());
+            resp.setCode(HttpStatus.BAD_REQUEST.value());
+            resp.setMessage("Something went wrong when creating recipe!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
         }
     }
 
@@ -176,21 +169,7 @@ public class MyRecipeRESTController {
                 Recipe r = recipeOpt.get();
                 s3Svc.delete(r.getThumbnail());
 
-                String msgBody = """
-                        <div style="text-align:center;">
-                        <h1>Recipe Removed</h1>
-                        <p>Say goodbye to your %s recipe!</p>
-                        <p>Feel free to add more into your collection!</p>
-                        <a href="%s" style="
-                        background-color: orange;
-                        color: white;
-                        padding: 15px 25px;
-                        text-decoration: none;
-                        cursor: pointer;
-                        border: none;
-                        border-radius: 10px;">Create Recipe</a>
-                        </div>
-                        """.formatted(
+                String msgBody = EmailTemplate.constructRecipeRemoved(
                             r.getName(),
                             URLs.URL_HOME + "/#/account/recipe/create");
                 String subject = "Recipe removed!";
@@ -259,21 +238,7 @@ public class MyRecipeRESTController {
         try {
             if (myRecipeSvc.editRecipe(r, email)) {
 
-                String msgBody = """
-                        <div style="text-align:center;">
-                        <h1>Your recipe was updated</h1>
-                        <p>You have updated your <b>%s</b> recipe!</p>
-                        <p><img src="%s"></p>
-                        <a href="%s" style="
-                        background-color: orange;
-                        color: white;
-                        padding: 15px 25px;
-                        text-decoration: none;
-                        cursor: pointer;
-                        border: none;
-                        border-radius: 10px;">View Recipe</a>
-                        </div>
-                        """.formatted(
+                String msgBody = EmailTemplate.constructRecipeEdited(
                             r.getName(),
                             URLs.URL_DO_THUMBNAILS + "/" + r.getThumbnail(),
                             URLs.URL_HOME + "/#/recipe/user/" + r.getRecipeId()
