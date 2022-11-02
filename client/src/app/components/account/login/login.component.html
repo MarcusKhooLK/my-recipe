@@ -1,7 +1,7 @@
 <div class="container align-center">
     <div class="row" *ngIf="!isLoggedIn">
         <div class="col">
-            <p align="center"><mat-spinner *ngIf="isLoading"></mat-spinner></p>
+            <p align="center" class="mt-5"><mat-spinner *ngIf="isLoading"></mat-spinner></p>
             <div *ngIf="!isLoading">
                 <h1>Sign In</h1>
                 <h2>Don't have an account? <button [routerLink]="['/account/create']" mat-raised-button color="primary">Sign up</button></h2>

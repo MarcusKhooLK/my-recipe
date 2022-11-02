@@ -13,7 +13,7 @@ export class CreateComponent implements OnInit {
 
   form!: FormGroup
   errorMsg: string = ""
-  isLoggedIn: boolean = false;
+  isLoggedIn: boolean = false
   isLoading: boolean = false
 
   constructor(private fb: FormBuilder, private accSvc: AccountService, private router: Router) { }

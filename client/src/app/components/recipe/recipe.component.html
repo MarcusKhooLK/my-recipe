@@ -31,8 +31,7 @@
             </div>
             <div class="row mt-5 mb-5">
                 <div *ngIf="recipe.youtubeLink">
-                    <a href="{{recipe.youtubeLink}}" target="_blank">{{recipe.youtubeLink}}</a>
-                    <!--<iframe width="1024" height="576" src="{{recipe.youtubeLink|safe:'resourceUrl'}}"></iframe>-->
+                    <a href="{{recipe.youtubeLink}}" target="_blank" mat-raised-button color="primary" class="mb-5"><mat-icon>tv</mat-icon> Watch Video</a> 
                 </div>
             </div>
         </div>

@@ -1,7 +1,14 @@
 <div class="container" style="text-align: center;">
-    <div class="row" *ngIf="isLoggedIn">
+    <div class="row mt-5" *ngIf="!isLoggedIn">
         <div class="col">
             <p align="center">
+                <mat-spinner></mat-spinner>
+            </p>
+        </div>
+    </div>
+    <div class="row" *ngIf="isLoggedIn">
+        <div class="col">
+            <p align="center" class="mt-5">
                 <mat-spinner *ngIf="isLoading"></mat-spinner>
             </p>
             <div *ngIf="!isLoading">

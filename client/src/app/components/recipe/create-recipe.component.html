@@ -1,8 +1,15 @@
 <div class="container align-center">
+    <div class="row mt-5" *ngIf="!isLoggedIn">
+        <div class="col">
+            <p align="center">
+                <mat-spinner></mat-spinner>
+            </p>
+        </div>
+    </div>
     <div class="row mt-5" *ngIf="isLoggedIn">
         <div class="col">
             <h1>Create your Recipe!</h1>
-            <p align="center">
+            <p align="center" class="mt-5">
                 <mat-spinner *ngIf="isLoading"></mat-spinner>
             </p>
             <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmitForm()">
