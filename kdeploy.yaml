@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myrecipe-deploy
+  labels:
+    app: myrecipe
+  namespace: vttp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: myrecipe-pod
+      dept: eng
+  template:
+    metadata:
+      name: myrecipe-pod
+      labels:
+        name: myrecipe-pod
+        dept: eng
+    spec:
+      containers:
+      - name: myrecipe-container
+        image: marcuskhoo/myrecipe:v0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: myrecipe-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myrecipe-svc-lb
+  namespace: vttp
+spec:
+  type: LoadBalancer
+  selector:
+    name: myrecipe-pod
+    dept: eng
+  ports:
+  - name: p80
+    port: 80
+    targetPort: 8080
