@@ -1,5 +1,6 @@
 package com.myrecipe.server.services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.myrecipe.server.models.Recipe;
 import com.myrecipe.server.models.RecipeSummary;
@@ -24,7 +26,7 @@ public class MyRecipeService {
     private AccountRepository accRepo;
 
     @Transactional
-    public int createRecipe(Recipe r, String email) {
+    public int createRecipe(Recipe r, String email, byte[] file) {
         Optional<User> user = accRepo.findUserByEmail(email);
 
         if(user.isEmpty()) {
@@ -39,7 +41,8 @@ public class MyRecipeService {
 
         r.setRecipeId(recipeId.toString());
 
-        boolean result = myRecipeRepo.insertIngredients(r.getIngredients(), r.getMeasurements(), recipeId);
+        myRecipeRepo.insertIngredients(r.getIngredients(), r.getMeasurements(), recipeId);
+        boolean result = myRecipeRepo.insertThumbnail(file, recipeId);
 
         if(result) {
             return recipeId;
@@ -49,7 +52,7 @@ public class MyRecipeService {
     }
 
     @Transactional
-    public Boolean editRecipe(Recipe recipe, String email) {
+    public Boolean editRecipe(Recipe recipe, String email, MultipartFile file) throws IOException {
         if(email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException();
         }
@@ -62,6 +65,13 @@ public class MyRecipeService {
 
         myRecipeRepo.editRecipe(recipe, userOpt.get().getUserId());
         Integer recipeId = Integer.parseInt(recipe.getRecipeId());
+
+        if(file!= null){
+            myRecipeRepo.deleteThumbnailByRecipeId(recipeId);
+            System.out.println(file.getOriginalFilename());
+            myRecipeRepo.insertThumbnail(file.getBytes(), recipeId);
+        }
+
         myRecipeRepo.deleteIngredientsByRecipeId(recipeId);
         return myRecipeRepo.insertIngredients(recipe.getIngredients(), recipe.getMeasurements(), recipeId);
     }
@@ -97,10 +107,15 @@ public class MyRecipeService {
         return myRecipeRepo.getRecipesSummaryByArea(area);
     }
 
+    public Optional<byte[]> getThumbnail(String recipeId) {
+        return myRecipeRepo.getThumbnail(recipeId);
+    } 
+
     @Transactional
     public boolean deleteRecipeByRecipeId(String recipeId) {
         int rId = Integer.parseInt(recipeId);
         if(myRecipeRepo.deleteIngredientsByRecipeId(rId)) {
+            myRecipeRepo.deleteThumbnailByRecipeId(rId);
             return myRecipeRepo.deleteRecipeByRecipeId(rId);
         }
         return false;

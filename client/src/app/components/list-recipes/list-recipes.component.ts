@@ -83,6 +83,7 @@ export class ListRecipesComponent implements OnInit {
     if (this.query) {
       this.mealDbSvc.getRecipes(this.query)
         .then(result => {
+          console.log(result)
           this.recipes = result
         })
         .then(result => {

@@ -1,5 +1,6 @@
 package com.myrecipe.server.controllers;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -60,12 +61,13 @@ public class MyRecipeRESTController {
 
         Response resp = new Response();
 
-        Optional<String> thumbnailOpt = s3Svc.upload(file, email);
-        if (thumbnailOpt.isEmpty()) {
-            resp.setCode(HttpStatus.BAD_REQUEST.value());
-            resp.setMessage("Something went wrong when creating recipe! Failed to upload thumbnail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
-        }
+        // S3 is disabled, I will use local mysql below instead
+        // Optional<String> thumbnailOpt = s3Svc.upload(file, email);
+        // if (thumbnailOpt.isEmpty()) {
+        //     resp.setCode(HttpStatus.BAD_REQUEST.value());
+        //     resp.setMessage("Something went wrong when creating recipe! Failed to upload thumbnail");
+        //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
+        // }
 
         Recipe r = new Recipe();
         r.setName(name);
@@ -77,28 +79,35 @@ public class MyRecipeRESTController {
         List<String> measurementsList = Arrays.asList(measurements.split(","));
         r.setIngredients(ingredientsList);
         r.setMeasurements(measurementsList);
-        r.setThumbnail(thumbnailOpt.get());
+        //r.setThumbnail(thumbnailOpt.get());
 
-        int recipeId = myRecipeSvc.createRecipe(r, email);
+        try {
+            int recipeId = myRecipeSvc.createRecipe(r, email, file.getBytes());
 
-        if (recipeId > 0) {
-            String msgBody = EmailTemplate.constructRecipeCreated(
-                        r.getName(),
-                        URLs.URL_DO_THUMBNAILS + "/" + thumbnailOpt.get(),
-                        URLs.URL_HOME + "/#/recipe/user/" + recipeId);
-            String subject = "New Recipe Created!";
-            EmailDetails details = new EmailDetails(email, msgBody, subject);
-            emailSvc.sendEmail(details);
+            if (recipeId > 0) {
+                String msgBody = EmailTemplate.constructRecipeCreated(
+                            r.getName(),
+                            "testing",//URLs.URL_DO_THUMBNAILS + "/" + thumbnailOpt.get(),
+                            URLs.URL_HOME + "/#/recipe/user/" + recipeId);
+                String subject = "New Recipe Created!";
+                EmailDetails details = new EmailDetails(email, msgBody, subject);
+                emailSvc.sendEmail(details);
+    
+                resp.setCode(HttpStatus.CREATED.value());
+                resp.setMessage("Recipe created");
+                JsonObject data = Json.createObjectBuilder().add("recipeId", recipeId).build();
+                resp.setData(data);
+                return ResponseEntity.status(HttpStatus.CREATED).body(resp.toJson().toString());
+            } else {
+                //s3Svc.delete(thumbnailOpt.get());
+                resp.setCode(HttpStatus.BAD_REQUEST.value());
+                resp.setMessage("Something went wrong when creating recipe!");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
+            }
 
-            resp.setCode(HttpStatus.CREATED.value());
-            resp.setMessage("Recipe created");
-            JsonObject data = Json.createObjectBuilder().add("recipeId", recipeId).build();
-            resp.setData(data);
-            return ResponseEntity.status(HttpStatus.CREATED).body(resp.toJson().toString());
-        } else {
-            s3Svc.delete(thumbnailOpt.get());
+        } catch(IOException ex) {
             resp.setCode(HttpStatus.BAD_REQUEST.value());
-            resp.setMessage("Something went wrong when creating recipe!");
+            resp.setMessage("Something went wrong with thumbnail file!");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp.toJson().toString());
         }
     }
@@ -167,7 +176,7 @@ public class MyRecipeRESTController {
 
             if (myRecipeSvc.deleteRecipeByRecipeId(recipeId)) {
                 Recipe r = recipeOpt.get();
-                s3Svc.delete(r.getThumbnail());
+                //s3Svc.delete(r.getThumbnail());
 
                 String msgBody = EmailTemplate.constructRecipeRemoved(
                             r.getName(),
@@ -224,23 +233,24 @@ public class MyRecipeRESTController {
         r.setIngredients(ingredientsList);
         r.setMeasurements(measurementsList);
 
-        if (file != null) {
-            Optional<String> thumbnailOpt = s3Svc.upload(file, email);
-            if (thumbnailOpt.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            s3Svc.delete(oldRecipe.getThumbnail());
-            r.setThumbnail(thumbnailOpt.get());
-        } else {
-            r.setThumbnail(oldRecipe.getThumbnail());
-        }
+
+        // if (file != null) {
+        //     Optional<String> thumbnailOpt = s3Svc.upload(file, email);
+        //     if (thumbnailOpt.isEmpty()) {
+        //         return ResponseEntity.badRequest().build();
+        //     }
+        //     s3Svc.delete(oldRecipe.getThumbnail());
+        //     r.setThumbnail(thumbnailOpt.get());
+        // } else {
+        //     r.setThumbnail(oldRecipe.getThumbnail());
+        // }
 
         try {
-            if (myRecipeSvc.editRecipe(r, email)) {
+            if (myRecipeSvc.editRecipe(r, email, file)) {
 
                 String msgBody = EmailTemplate.constructRecipeEdited(
                             r.getName(),
-                            URLs.URL_DO_THUMBNAILS + "/" + r.getThumbnail(),
+                            "testing",//URLs.URL_DO_THUMBNAILS + "/" + r.getThumbnail(),
                             URLs.URL_HOME + "/#/recipe/user/" + r.getRecipeId()
                             );
                 String subject = "Recipe Updated!";

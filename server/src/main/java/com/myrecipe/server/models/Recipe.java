@@ -67,7 +67,7 @@ public class Recipe extends RecipeSummary{
         Recipe recipe = new Recipe();
         recipe.setRecipeId(jsonObject.getString("idMeal", ""));
         recipe.setName(jsonObject.getString("strMeal", ""));
-        recipe.setThumbnail(jsonObject.getString("strMealThumb", ""));
+        recipe.setMealDBThumbnail(jsonObject.getString("strMealThumb", ""));
         recipe.setCategory(jsonObject.getString("strCategory", ""));
         recipe.setCountry(jsonObject.getString("strArea", ""));
         recipe.setInstructions(jsonObject.getString("strInstructions", ""));
@@ -103,9 +103,9 @@ public class Recipe extends RecipeSummary{
         return Json.createObjectBuilder()
                 .add("recipeId", getRecipeId())
                 .add("name", getName())
-                .add("thumbnail", getThumbnail())
                 .add("category", category)
                 .add("country", country)
+                .add("mealDBThumbnail", getMealDBThumbnail() == null ? "" : getMealDBThumbnail())
                 .add("instructions", instructions)
                 .add("youtubeLink", (youtubeLink == null) ? "" : youtubeLink)
                 .add("createdBy", createdBy)
@@ -120,7 +120,6 @@ public class Recipe extends RecipeSummary{
         r.setName(result.getString("name"));
         r.setCategory(result.getString("category"));
         r.setCountry(result.getString("country"));
-        r.setThumbnail(result.getString("thumbnail"));
         r.setYoutubeLink(result.getString("youtubeLink"));
         r.setInstructions(result.getString("instructions"));
         return r;

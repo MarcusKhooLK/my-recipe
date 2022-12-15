@@ -8,7 +8,14 @@ import jakarta.json.JsonObject;
 public class RecipeSummary {
     private String recipeId;
     private String name;
-    private String thumbnail;
+    private String mealDBThumbnail;
+    
+    public String getMealDBThumbnail() {
+        return mealDBThumbnail;
+    }
+    public void setMealDBThumbnail(String mealDBThumbnail) {
+        this.mealDBThumbnail = mealDBThumbnail;
+    }
     public String getRecipeId() {
         return recipeId;
     }
@@ -21,18 +28,12 @@ public class RecipeSummary {
     public void setName(String name) {
         this.name = name;
     }
-    public String getThumbnail() {
-        return thumbnail;
-    }
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
 
     public static RecipeSummary convert(JsonObject jsonObject) {
         RecipeSummary recipeSummary = new RecipeSummary();
         recipeSummary.setRecipeId(jsonObject.getString("idMeal", ""));
         recipeSummary.setName(jsonObject.getString("strMeal", ""));
-        recipeSummary.setThumbnail(jsonObject.getString("strMealThumb", ""));
+        recipeSummary.setMealDBThumbnail(jsonObject.getString("strMealThumb", ""));
         return recipeSummary;
     }
 
@@ -40,7 +41,6 @@ public class RecipeSummary {
         RecipeSummary recipeSummary = new RecipeSummary();
         recipeSummary.setRecipeId(String.valueOf(rs.getInt("recipe_id")));
         recipeSummary.setName(rs.getString("name"));
-        recipeSummary.setThumbnail(rs.getString("thumbnail"));
         return recipeSummary;
     }
 
@@ -48,7 +48,7 @@ public class RecipeSummary {
         return Json.createObjectBuilder()
         .add("recipeId", recipeId)
         .add("name", name)
-        .add("thumbnail", thumbnail)
+        .add("mealDBThumbnail", mealDBThumbnail == null ? "" : mealDBThumbnail)
         .build();
     }
 }

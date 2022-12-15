@@ -8,10 +8,10 @@
                 </p>
                 <div class="row">
                     <div class="col-md-auto" *ngFor="let r of recipes">
-                        <p><a *ngIf="!r.user" [routerLink]="['/recipe', r.recipeId]"><img src="{{r.thumbnail}}" width="200"
+                        <p><a *ngIf="!r.user" [routerLink]="['/recipe', r.recipeId]"><img src="{{r.mealDBThumbnail}}" width="200"
                                 height="auto"></a></p>
                         <p><a *ngIf="r.user" [routerLink]="['/recipe/user', r.recipeId]"><img
-                                src="/thumbnails/{{r.thumbnail}}" width="200" height="auto"></a></p>
+                                src="/thumbnails/{{r.recipeId}}" width="200" height="auto"></a></p>
 
                         <p><a *ngIf="!r.user" [routerLink]="['/recipe', r.recipeId]"><span style="
                                 display:inline-block;

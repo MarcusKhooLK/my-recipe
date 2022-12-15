@@ -19,13 +19,18 @@ import com.myrecipe.server.EmailDetails;
 @Service
 public class EmailService {
 
-    @Value("${spring.mail.username}")
+    //@Value("${spring.mail.username}")
     private String sender;
 
-    @Value("${spring.mail.password}")
+    //@Value("${spring.mail.password}")
     private String password;
 
+    private boolean isEnabled = false;
+    public boolean getIsEnabled() { return isEnabled; }
+
     public boolean sendSimpleMail(EmailDetails details) {
+        if(!isEnabled) return true;
+
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");
@@ -60,6 +65,8 @@ public class EmailService {
     }
 
     public boolean sendEmail(EmailDetails email) {
+        if(!isEnabled) return true;
+
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");

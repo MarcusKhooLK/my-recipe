@@ -19,7 +19,6 @@ create table recipe(
     category varchar(32),
     country varchar(32),
     instructions mediumtext not null,
-    thumbnail varchar(128),
     youtubeLink varchar(128),
     user_id int not null,
     primary key(recipe_id),
@@ -36,5 +35,15 @@ create table ingredient(
     primary key(ingredient_id),
     constraint fk_recipe_id
         foreign key(recipe_id) 
+        references recipe(recipe_id)
+);
+
+create table thumbnail(
+    thumbnail_id int not null auto_increment,
+    thumbnail_image mediumblob not null,
+    recipe_id int not null,
+    primary key(thumbnail_id),
+    constraint fk_recipe_id
+        foreign key(recipe_id)
         references recipe(recipe_id)
 );

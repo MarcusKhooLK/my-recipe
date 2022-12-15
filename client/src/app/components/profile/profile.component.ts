@@ -74,7 +74,7 @@ export class ProfileComponent implements OnInit {
     .then(result=>{
       console.info(">>> result: ", result)
       this.form = this.createForm(result)
-      this.oldThumbnail = result.thumbnail
+      this.oldThumbnail = result.recipeId
       this.isLoading = false
     })
     .catch(error=>{

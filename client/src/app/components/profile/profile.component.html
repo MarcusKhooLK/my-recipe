@@ -37,8 +37,8 @@
                             </p>
                             <p>
                                 <a [routerLink]="['/recipe', 'user', r.recipeId]">
-                                    <img *ngIf="!r.user" src="{{r.thumbnail}}" width="200" height="auto">
-                                    <img *ngIf="r.user" src="/thumbnails/{{r.thumbnail}}" width="200" height="auto"></a>
+                                    <img *ngIf="!r.user" src="{{r.mealDBThumbnail}}" width="200" height="auto">
+                                    <img *ngIf="r.user" src="/thumbnails/{{r.recipeId}}" width="200" height="auto"></a>
                             </p>
                             <p><a [routerLink]="['/recipe', 'user', r.recipeId]">{{r.name}}</a></p>
                         </div>

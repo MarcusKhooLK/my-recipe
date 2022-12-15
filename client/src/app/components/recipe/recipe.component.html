@@ -10,8 +10,8 @@
         <div class="col">
             <h1>{{recipe.name}} | Created by: {{recipe.createdBy}}</h1>
             <p>
-                <img *ngIf="!recipe.user" src="{{recipe.thumbnail}}" width="80%" height="auto">
-                <img *ngIf="recipe.user" src="/thumbnails/{{recipe.thumbnail}}" width="80%" height="auto">
+                <img *ngIf="!recipe.user" src="{{recipe.mealDBThumbnail}}" width="80%" height="auto">
+                <img *ngIf="recipe.user" src="/thumbnails/{{recipe.recipeId}}" width="80%" height="auto">
             </p>
             <p>
                 <button [routerLink]="['/recipes/category', recipe.category]" mat-raised-button color="primary"

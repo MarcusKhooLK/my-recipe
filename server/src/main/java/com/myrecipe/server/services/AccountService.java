@@ -82,8 +82,8 @@ public class AccountService {
         sessionRepo.removeSession(email);
         List<RecipeSummary> recipes = recipeSvc.getRecipesSummaryByEmail(email);
         recipes.forEach(v->{
-            if(recipeSvc.deleteRecipeByRecipeId(v.getRecipeId()))
-                s3Svc.delete(v.getThumbnail());
+            recipeSvc.deleteRecipeByRecipeId(v.getRecipeId());
+                //s3Svc.delete(v.getThumbnail());
         });
 
         return accRepo.deleteAccount(email);

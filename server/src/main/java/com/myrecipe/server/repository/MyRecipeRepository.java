@@ -1,5 +1,6 @@
 package com.myrecipe.server.repository;
 
+import java.lang.StackWalker.Option;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -20,7 +21,7 @@ import com.myrecipe.server.models.RecipeSummary;
 @Repository
 public class MyRecipeRepository {
     
-    private static final String SQL_INSERT_RECIPE = "insert into recipe (name, category, country, instructions, thumbnail, youtubeLink, user_id) values (?, ?, ?, ?, ?, ?, ?);";
+    private static final String SQL_INSERT_RECIPE = "insert into recipe (name, category, country, instructions, youtubeLink, user_id) values (?, ?, ?, ?, ?, ?);";
     private static final String SQL_INSERT_INGREDIENT = "insert into ingredient (name, measurement, recipe_id) values (?, ?, ?);";
     private static final String SQL_SELECT_RECIPE_BY_ID = "select * from recipe where recipe_id = ?;";
     private static final String SQL_SELECT_RECIPE_BY_USER_ID = "select * from recipe where user_id = ?;";
@@ -38,12 +39,15 @@ public class MyRecipeRepository {
     private static final String SQL_DELETE_RECIPE_BY_ID = "delete from recipe where recipe_id = ?;";
     private static final String SQL_UPDATE_RECIPE = 
     """
-    update recipe set name = ?, category = ?, country = ?, instructions = ?, thumbnail = ?, youtubeLink = ?
+    update recipe set name = ?, category = ?, country = ?, instructions = ?, youtubeLink = ?
     where recipe_id = ? and user_id = ?;
     """;
 
     private static final String SQL_DELETE_INGREDIENTS_BY_RECIPEID = "delete from ingredient where recipe_id = ?;";
     private static final String SQL_SELECT_INGREDIENTS_BY_RECIPE_ID = "select * from ingredient where recipe_id = ?;";
+    private static final String SQL_INSERT_THUMBNAIL = "insert into thumbnail (thumbnail_image, recipe_id) values (?, ?);";
+    private static final String SQL_DELETE_THUMBNAIL_BY_RECIPEID = "delete from thumbnail where recipe_id = ?;";
+    private static final String SQL_SELECT_THUMBNAIL_BY_RECIPE_ID = "select * from thumbnail where recipe_id = ?;";
 
     @Autowired
     private JdbcTemplate template;
@@ -56,9 +60,8 @@ public class MyRecipeRepository {
             ps.setString(2,r.getCategory());
             ps.setString(3,r.getCountry());
             ps.setString(4,r.getInstructions());
-            ps.setString(5,r.getThumbnail());
-            ps.setString(6,r.getYoutubeLink());
-            ps.setInt(7, userId);
+            ps.setString(5,r.getYoutubeLink());
+            ps.setInt(6, userId);
             return ps;
         }, keyHolder);
         BigInteger bigInt = (BigInteger)keyHolder.getKey();
@@ -92,6 +95,11 @@ public class MyRecipeRepository {
         return true;
     }
 
+    public boolean insertThumbnail(byte[] file, Integer recipeId) {
+        int result = template.update(SQL_INSERT_THUMBNAIL, file, recipeId);
+        return result > 0;
+    }
+
     public Optional<Recipe> getRecipeByRecipeId(Integer recipeId) {
         final SqlRowSet recipeResult = template.queryForRowSet(SQL_SELECT_RECIPE_BY_ID, recipeId);
         
@@ -116,6 +124,8 @@ public class MyRecipeRepository {
 
             r.setIngredients(ingredients);
             r.setMeasurements(measurements);
+
+
 
             return Optional.of(r);
         } else {
@@ -166,13 +176,30 @@ public class MyRecipeRepository {
         return recipes;
     }
 
+    public Optional<byte[]> getThumbnail(String recipeId) {
+        return template.query(SQL_SELECT_THUMBNAIL_BY_RECIPE_ID, rs->{
+            if(!rs.next()) {
+                return Optional.empty();
+            }
+            return Optional.of(rs.getBytes("thumbnail_image"));
+        }, recipeId);
+    }
+
     public boolean deleteRecipeByRecipeId(Integer recipeId) {
         int result = template.update(SQL_DELETE_RECIPE_BY_ID, recipeId);
+        System.out.println("DELETE RECIPE: " + result);
         return result > 0;
     }
 
     public boolean deleteIngredientsByRecipeId(Integer recipeId) {
         int result = template.update(SQL_DELETE_INGREDIENTS_BY_RECIPEID, recipeId);
+        System.out.println("DELETE INGREDIENTS: " + result);
+        return result > 0;
+    }
+
+    public boolean deleteThumbnailByRecipeId(Integer recipeId) {
+        int result = template.update(SQL_DELETE_THUMBNAIL_BY_RECIPEID, recipeId);
+        System.out.println("DELETE THUMBNAIL: " + result);
         return result > 0;
     }
 
@@ -182,7 +209,6 @@ public class MyRecipeRepository {
         recipe.getCategory(), 
         recipe.getCountry(),
         recipe.getInstructions(), 
-        recipe.getThumbnail(), 
         recipe.getYoutubeLink(), 
         recipe.getRecipeId(), 
         userId);
